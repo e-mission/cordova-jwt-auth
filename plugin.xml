@@ -52,6 +52,8 @@
       </feature>
     </config-file>
 
+    <framework src="src/ios/frameworks/GoogleOpenSource.framework" custom="true" />
+
     <header-file src="src/ios/BEMJWTAuth.h"/>
     <header-file src="src/ios/AuthCompletionHandler.h"/>
     <header-file src="src/ios/SkipAuthEmailViewController.h"/>
