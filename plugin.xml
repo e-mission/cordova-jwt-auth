@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
+        id="edu.berkeley.eecs.emission.cordova.auth"
+        version="0.0.1">
+
+  <name>JWTAuth</name>
+  <description>Get the user email and associated JWT tokens from both native
+        code and javascript. These are merged since the typical OAuth/JWT
+        process returns both the email address that the user logged in as, as a
+        token that encodes that value. </description>
+  <author>K. Shankari (shankari@eecs.berkeley.edu)</author>
+  <license>Modified BSD license</license>
+
+  <engines>
+    <engine name="cordova" version=">=3.6.0"/>
+  </engines>
+
+  <asset src="www/jwtauth.js" target="js/jwtauth.js"/>
+
+  <js-module src="www/jwtauth.js" name="jwtauth">
+    <clobbers target="cordova.plugins.BEMJWTAuth" />
+  </js-module>
+
+  <dependency id="edu.berkeley.eecs.emission.cordova.unifiedlogger"
+                url="https://github.com/e-mission/cordova-unified-logger.git"/>
+  <dependency id="edu.berkeley.eecs.emission.cordova.settings"
+                url="https://github.com/e-mission/cordova-connection-settings.git"/>
+
+  <platform name="android">
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="JWTAuth">
+        <param name="android-package" value="edu.berkeley.eecs.emission.cordova.jwtauth.JWTAuthPlugin"/>
+      </feature>
+    </config-file>
+
+    <config-file target="AndroidManifest.xml" parent="/manifest">
+        <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+        <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
+        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    </config-file>
+
+    <source-file src="src/android/JWTAuthPlugin.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
+    <source-file src="src/android/GoogleAccountManagerAuth.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
+    <source-file src="src/android/UserProfile.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
+  </platform>
+
+  <platform name="ios">
+    
+    <config-file target="config.xml" parent="/*">
+      <feature name="JWTAuth">
+        <param name="ios-package" value="BEMJWTAuth" />
+      </feature>
+    </config-file>
+
+    <header-file src="src/ios/BEMJWTAuth.h"/>
+    <header-file src="src/ios/AuthCompletionHandler.h"/>
+    <header-file src="src/ios/SkipAuthEmailViewController.h"/>
+    <source-file src="src/ios/BEMJWTAuth.m"/>
+    <source-file src="src/ios/AuthCompletionHandler.m"/>
+    <source-file src="src/ios/SkipAuthEmailViewController.m"/>
+    <source-file src="src/ios/SkipAuthEmailViewController.m"/>
+    <source-file src="src/ios/SkipAuthEmailViewController.xib"/>
+  </platform>
+</plugin>
