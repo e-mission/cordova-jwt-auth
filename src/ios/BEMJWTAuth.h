@@ -1,4 +1,5 @@
 #import <Cordova/CDV.h>
+#import "AuthCompletionHandler.h" 
 
 @interface BEMJWTAuth: CDVPlugin <AuthCompletionDelegate>
 

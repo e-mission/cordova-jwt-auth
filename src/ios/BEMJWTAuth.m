@@ -1,11 +1,12 @@
 #import "BEMJWTAuth.h"
 #import "AuthCompletionHandler.h"
+#import "BEMConnectionSettings.h"
 
 @interface BEMJWTAuth () <AuthCompletionDelegate>
 @property (nonatomic, retain) CDVInvokedUrlCommand* command;
 @end
 
-@implementation BEMConnectionSettings
+@implementation BEMJWTAuth: CDVPlugin
 
 - (void)pluginInitialize
 {
@@ -33,7 +34,7 @@
         }
     }
     @catch (NSException *exception) {
-        NSString* msg = [NSString stringWithFormat: @"While getting user email, error %@", e];
+        NSString* msg = [NSString stringWithFormat: @"While getting user email, error %@", exception];
         CDVPluginResult* result = [CDVPluginResult
                                    resultWithStatus:CDVCommandStatus_ERROR
                                    messageAsString:msg];
@@ -44,12 +45,11 @@
 
 - (void)signIn:(CDVInvokedUrlCommand*)command
 {
-    NSString* callbackId = [command callbackId];
     _command = command;
 
     [self.commandDelegate runInBackground:^{
         [self presentSigninController];
-    };
+    }];
 }
 
 - (void)getJWT:(CDVInvokedUrlCommand*)command
@@ -63,9 +63,9 @@
              * because it might have expired, and then we need to refresh. Instead, we
              * call the special method just for this.
              */
-            [AuthCompletionHandler getValidAuth:^((GTMOAuth2Authentication*)auth error:(NSError*)error) {
+            [[AuthCompletionHandler sharedInstance] getValidAuth:^(GTMOAuth2Authentication* auth, NSError* error) {
                 if (error == NULL) {
-                    NSString* token = [AuthCompletionHandler getIdToken];
+                    NSString* token = [[AuthCompletionHandler sharedInstance] getIdToken];
                     CDVPluginResult* result = [CDVPluginResult
                                                resultWithStatus:CDVCommandStatus_OK
                                                messageAsString:token];
@@ -80,7 +80,7 @@
             }];
         }
         @catch (NSException *exception) {
-            NSString* msg = [NSString stringWithFormat: @"While getting user email, error %@", e];
+            NSString* msg = [NSString stringWithFormat: @"While getting user email, error %@", exception];
             CDVPluginResult* result = [CDVPluginResult
                                        resultWithStatus:CDVCommandStatus_ERROR
                                        messageAsString:msg];
@@ -90,7 +90,7 @@
 }
 
 -(void) presentSigninController {
-    [[AuthCompletionHandle sharedInstance] registerFinishDelegate:self];
+    [[AuthCompletionHandler sharedInstance] registerFinishDelegate:self];
     UIViewController* loginScreen = [[AuthCompletionHandler sharedInstance] getSigninController];
     [self.viewController presentViewController:loginScreen
                                       animated:YES
@@ -101,15 +101,20 @@
                    error:(NSError *)error {
     NSLog(@"SignInViewController.finishedWithAuth called with auth = %@ and error = %@", auth, error);
     if (error == NULL) {
-        [self.commandDelegate sendPluginResult:CDVCommandStatus_OK
-                                    callbackId:_command.callbackId];
+        CDVPluginResult* result = [CDVPluginResult
+                                   resultWithStatus:CDVCommandStatus_OK
+                               messageAsString:auth.userEmail];
+        [self.commandDelegate sendPluginResult:result
+                                    callbackId:self.command.callbackId];
     } else {
         NSString* msg = [NSString stringWithFormat: @"While getting auth token, error %@", error];
-        [self.commandDelegate sendPluginResult:CDVCommandStatus_ERROR 
-                                    callbackId:_command.callbackId
+        CDVPluginResult* result = [CDVPluginResult
+                                   resultWithStatus:CDVCommandStatus_ERROR
                                messageAsString:msg];
+        [self.commandDelegate sendPluginResult:result
+                                    callbackId:_command.callbackId];
     }
-    [[AuthCompletionHandle sharedInstance] unregisterFinishDelegate:self];
+    [[AuthCompletionHandler sharedInstance] unregisterFinishDelegate:self];
 }
 
 @end

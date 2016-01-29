@@ -12,11 +12,19 @@
  */
 
 #import "AuthCompletionHandler.h"
-#import "ConnectionSettings.h"
+#import "BEMConnectionSettings.h"
 #import "SkipAuthEmailViewController.h"
 #import <GoogleOpenSource/GoogleOpenSource.h>
 #import <GoogleOpenSource/GTMOAuth2ViewControllerTouch.h>
 
+// #define errorDomain @"e-mission-domain"
+NSString* const errorDomain = @"e-mission-domain";
+NSString* const BackgroundRefreshNewData = @"BackgroundRefreshNewData";
+int const authFailedNeedUserInput = -100;
+
+static inline NSString* NSStringFromBOOL(BOOL aBool) {
+    return aBool? @"YES" : @"NO";
+}
 
 @interface AuthCompletionHandler() {
     NSMutableArray* listeners;
@@ -133,7 +141,6 @@ static AuthCompletionHandler *sharedInstance;
                             NSLog(@"Refresh is really done, posting to host");
                             assert(error == NULL);
                             authCompletionCallback(self.currAuth, NULL);
-                            [self postToHost];
                         }
                     }
                 }];
@@ -141,7 +148,6 @@ static AuthCompletionHandler *sharedInstance;
                 NSLog(@"Existing auth token not expired, posting to host");
                 assert(expired == FALSE);
                 authCompletionCallback(self.currAuth, NULL);
-                [self postToHost];
             }
         }
     }

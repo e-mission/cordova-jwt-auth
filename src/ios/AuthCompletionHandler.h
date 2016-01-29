@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <GoogleOpenSource/GoogleOpenSource.h>
 
-typedef void (^AuthCompletionCallback)((GTMOAuth2Authentication *)auth error:(NSError*) error);
+typedef void (^AuthCompletionCallback)(GTMOAuth2Authentication *,NSError*);
 
 @protocol AuthCompletionDelegate
 // The authorization has finished and is successful if |error| is |nil|.
@@ -51,6 +51,7 @@ typedef void (^AuthCompletionCallback)((GTMOAuth2Authentication *)auth error:(NS
 -(void)signOut;
 
 - (NSString*)getIdToken;
+- (void) getValidAuth:(AuthCompletionCallback) authCompletionCallback;
 
 - (void)viewController:(GTMOAuth2ViewControllerTouch *)viewController
       finishedWithAuth:(GTMOAuth2Authentication *)auth
