@@ -46,10 +46,7 @@
 - (void)signIn:(CDVInvokedUrlCommand*)command
 {
     _command = command;
-
-    [self.commandDelegate runInBackground:^{
         [self presentSigninController];
-    }];
 }
 
 - (void)getJWT:(CDVInvokedUrlCommand*)command
@@ -90,7 +87,9 @@
 }
 
 -(void) presentSigninController {
-    [[AuthCompletionHandler sharedInstance] registerFinishDelegate:self];
+    AuthCompletionHandler *signIn = [AuthCompletionHandler sharedInstance];
+    signIn.scope = @"https://www.googleapis.com/auth/plus.me";
+    [signIn registerFinishDelegate:self];
     UIViewController* loginScreen = [[AuthCompletionHandler sharedInstance] getSigninController];
     [self.viewController presentViewController:loginScreen
                                       animated:YES
@@ -98,8 +97,11 @@
 }
 
 - (void)finishedWithAuth:(GTMOAuth2Authentication *)auth
-                   error:(NSError *)error {
+                   error:(NSError *)error
+                    usingController:(UIViewController *)viewController {
     NSLog(@"SignInViewController.finishedWithAuth called with auth = %@ and error = %@", auth, error);
+    [[AuthCompletionHandler sharedInstance] unregisterFinishDelegate:self];
+    [viewController dismissViewControllerAnimated:YES completion:nil];
     if (error == NULL) {
         CDVPluginResult* result = [CDVPluginResult
                                    resultWithStatus:CDVCommandStatus_OK
@@ -114,7 +116,6 @@
         [self.commandDelegate sendPluginResult:result
                                     callbackId:_command.callbackId];
     }
-    [[AuthCompletionHandler sharedInstance] unregisterFinishDelegate:self];
 }
 
 @end

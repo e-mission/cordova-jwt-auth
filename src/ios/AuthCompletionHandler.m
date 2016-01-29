@@ -70,7 +70,9 @@ static AuthCompletionHandler *sharedInstance;
     }
 }
 
-- (void)finishedWithAuth:(GTMOAuth2Authentication *)auth error:(NSError *)error {
+- (void)finishedWithAuth:(GTMOAuth2Authentication *)auth
+                   error:(NSError *)error
+         usingController:(GTMOAuth2ViewControllerTouch *)viewController {
     // TODO: Improve this by caching copy of the listeners, so that the finishedWithAuth
     // calls, which can involve a remote call, can happen in parallel
     // This is would be a performance optimization
@@ -78,7 +80,7 @@ static AuthCompletionHandler *sharedInstance;
     @synchronized(self) {
         for (int i = 0; i < listeners.count; i++) {
             NSLog(@"AuthCompletionHandler.finishedWithAuth notifying listener %d", i);
-            [listeners[i] finishedWithAuth:auth error:error];
+            [listeners[i] finishedWithAuth:auth error:error usingController:viewController];
         }
     }
 }
@@ -299,7 +301,7 @@ static AuthCompletionHandler *sharedInstance;
         self.currAuth = auth;
     }
     
-    [self finishedWithAuth:auth error:error];
+    [self finishedWithAuth:auth error:error usingController:viewController];
 }
 
 -(NSString*)getIdToken {

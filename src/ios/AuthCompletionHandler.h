@@ -14,7 +14,8 @@ typedef void (^AuthCompletionCallback)(GTMOAuth2Authentication *,NSError*);
 @protocol AuthCompletionDelegate
 // The authorization has finished and is successful if |error| is |nil|.
 - (void)finishedWithAuth:(GTMOAuth2Authentication *)auth
-                   error:(NSError *)error;
+                   error:(NSError *)error
+         usingController:(UIViewController *)viewController;
 // Finished disconnecting user from the app.
 // The operation was successful if |error| is |nil|.
 @optional
