@@ -60,7 +60,6 @@
     <source-file src="src/ios/BEMJWTAuth.m"/>
     <source-file src="src/ios/AuthCompletionHandler.m"/>
     <source-file src="src/ios/SkipAuthEmailViewController.m"/>
-    <source-file src="src/ios/SkipAuthEmailViewController.m"/>
     <source-file src="src/ios/SkipAuthEmailViewController.xib"/>
   </platform>
 </plugin>
