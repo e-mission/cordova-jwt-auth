@@ -72,7 +72,7 @@ static AuthCompletionHandler *sharedInstance;
 
 - (void)finishedWithAuth:(GTMOAuth2Authentication *)auth
                    error:(NSError *)error
-         usingController:(GTMOAuth2ViewControllerTouch *)viewController {
+         usingController:(UIViewController *)viewController {
     // TODO: Improve this by caching copy of the listeners, so that the finishedWithAuth
     // calls, which can involve a remote call, can happen in parallel
     // This is would be a performance optimization

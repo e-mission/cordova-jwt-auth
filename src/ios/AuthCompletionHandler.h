@@ -54,7 +54,7 @@ typedef void (^AuthCompletionCallback)(GTMOAuth2Authentication *,NSError*);
 - (NSString*)getIdToken;
 - (void) getValidAuth:(AuthCompletionCallback) authCompletionCallback;
 
-- (void)viewController:(GTMOAuth2ViewControllerTouch *)viewController
+- (void)viewController:(UIViewController *)viewController
       finishedWithAuth:(GTMOAuth2Authentication *)auth
                  error:(NSError *)error;
 
