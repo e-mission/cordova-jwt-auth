@@ -16,11 +16,7 @@
 #import "SkipAuthEmailViewController.h"
 #import <GoogleOpenSource/GoogleOpenSource.h>
 #import <GoogleOpenSource/GTMOAuth2ViewControllerTouch.h>
-
-// #define errorDomain @"e-mission-domain"
-NSString* const errorDomain = @"e-mission-domain";
-NSString* const BackgroundRefreshNewData = @"BackgroundRefreshNewData";
-int const authFailedNeedUserInput = -100;
+#import "Constants.h"
 
 static inline NSString* NSStringFromBOOL(BOOL aBool) {
     return aBool? @"YES" : @"NO";
