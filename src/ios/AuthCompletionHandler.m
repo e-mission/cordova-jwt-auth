@@ -16,7 +16,7 @@
 #import "SkipAuthEmailViewController.h"
 #import <GoogleOpenSource/GoogleOpenSource.h>
 #import <GoogleOpenSource/GTMOAuth2ViewControllerTouch.h>
-#import "Constants.h"
+#import "BEMConstants.h"
 
 static inline NSString* NSStringFromBOOL(BOOL aBool) {
     return aBool? @"YES" : @"NO";
