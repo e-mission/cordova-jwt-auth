@@ -21,10 +21,12 @@
     <clobbers target="cordova.plugins.BEMJWTAuth" />
   </js-module>
 
+  <!--
   <dependency id="edu.berkeley.eecs.emission.cordova.unifiedlogger"
                 url="https://github.com/e-mission/cordova-unified-logger.git"/>
   <dependency id="edu.berkeley.eecs.emission.cordova.settings"
                 url="https://github.com/e-mission/cordova-connection-settings.git"/>
+  -->
 
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
