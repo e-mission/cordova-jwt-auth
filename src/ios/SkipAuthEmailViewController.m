@@ -34,7 +34,7 @@
     NSString* userEmail = _userEmailField.text;
     GTMOAuth2Authentication* fakeAuth = [AuthCompletionHandler createFakeAuth:userEmail];
     [GTMOAuth2ViewControllerTouch saveParamsToKeychainForName:kKeychainItemName authentication:fakeAuth];
-    [[AuthCompletionHandler sharedInstance] viewController:NULL finishedWithAuth:fakeAuth error:NULL];
+    [[AuthCompletionHandler sharedInstance] viewController:self finishedWithAuth:fakeAuth error:NULL];
     [self.navigationController popViewControllerAnimated:YES];
 }
 

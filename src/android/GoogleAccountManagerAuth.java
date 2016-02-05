@@ -1,4 +1,4 @@
-package edu.berkeley.eecs.emisson.cordova.jwtauth;
+package edu.berkeley.eecs.emission.cordova.jwtauth;
 
 import java.io.IOException;
 
@@ -7,7 +7,7 @@ import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.AccountPicker;
 
-import edu.berkeley.eecs.cfc_tracker.ConnectionSettings;
+import edu.berkeley.eecs.emission.cordova.connectionsettings.ConnectionSettings;
 
 import android.app.Activity;
 import android.app.AlertDialog;

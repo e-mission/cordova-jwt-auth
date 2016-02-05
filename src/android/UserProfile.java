@@ -1,4 +1,4 @@
-package edu.berkeley.eecs.emisson.cordova.jwtauth;
+package edu.berkeley.eecs.emission.cordova.jwtauth;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -12,8 +12,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-
-import edu.berkeley.eecs.e_mission.CommunicationHelper;
 
 /*
  * Singleton class that is used to store profile information about the user.
@@ -144,15 +142,16 @@ public class UserProfile {
 		}
 		return theInstance;
 	}
-	
+
+    /*	
 	public interface RegisterUserResult {
 		abstract void registerComplete(String result);
 	}
+    */
 	
 	/*
 	 * TODO: Pull out the AsyncTask code, now used here, in the DisplayResultSummary, and in the AppSettings
 	 * into a separate class.
-	 */
 	public void registerUser(RegisterUserResult callbackObj) {
 //		final long startMs = System.currentTimeMillis();
 		final Context thisContext = savedCtxt;
@@ -186,4 +185,5 @@ public class UserProfile {
 		};
 		task.execute((Void)null);
 	}
+	 */
 }

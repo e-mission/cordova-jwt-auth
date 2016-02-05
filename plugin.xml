@@ -21,10 +21,12 @@
     <clobbers target="cordova.plugins.BEMJWTAuth" />
   </js-module>
 
+  <!--
   <dependency id="edu.berkeley.eecs.emission.cordova.unifiedlogger"
                 url="https://github.com/e-mission/cordova-unified-logger.git"/>
   <dependency id="edu.berkeley.eecs.emission.cordova.settings"
                 url="https://github.com/e-mission/cordova-connection-settings.git"/>
+  -->
 
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
@@ -39,6 +41,11 @@
         <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     </config-file>
 
+    <!-- For the google auth manager
+    <framework src="src/android/google_play_dep.gradle" custom="true" type="gradleReference"/>
+    -->
+    <framework src="com.google.android.gms:play-services:8.1.0"/>
+
     <source-file src="src/android/JWTAuthPlugin.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
     <source-file src="src/android/GoogleAccountManagerAuth.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
     <source-file src="src/android/UserProfile.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
@@ -52,12 +59,20 @@
       </feature>
     </config-file>
 
+    <framework src="src/ios/frameworks/GoogleOpenSource.framework" custom="true" />
+    <framework src="SystemConfiguration.framework"/>
+    <framework src="Security.framework"/>
+
     <header-file src="src/ios/BEMJWTAuth.h"/>
     <header-file src="src/ios/AuthCompletionHandler.h"/>
+    <header-file src="src/ios/AuthInspectorViewController.h"/>
     <header-file src="src/ios/SkipAuthEmailViewController.h"/>
     <source-file src="src/ios/BEMJWTAuth.m"/>
     <source-file src="src/ios/AuthCompletionHandler.m"/>
-    <source-file src="src/ios/SkipAuthEmailViewController.m"/>
+
+    <source-file src="src/ios/AuthInspectorViewController.m"/>
+    <source-file src="src/ios/GTMOAuth2ViewTouch.xib"/>
+
     <source-file src="src/ios/SkipAuthEmailViewController.m"/>
     <source-file src="src/ios/SkipAuthEmailViewController.xib"/>
   </platform>
