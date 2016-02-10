@@ -8,7 +8,7 @@ var JWTAuth = {
      * Can return null if the user is not signed in.
      */
     getUserEmail: function (successCallback, errorCallback) {
-        exec(successCallback, errorCallback, "JWTAuth", "getSignedInEmail", [level, message]);
+        exec(successCallback, errorCallback, "JWTAuth", "getUserEmail", []);
     },
 
     /*
