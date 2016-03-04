@@ -18,7 +18,6 @@
 
 #import "AuthInspectorViewController.h"
 
-#import <GoogleOpenSource/GoogleOpenSource.h>
 #import "AuthCompletionHandler.h"
 
 static NSString * const kReusableCellIdentifier = @"AuthInspectorCell";

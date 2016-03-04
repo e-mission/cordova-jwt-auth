@@ -74,7 +74,7 @@
                                                messageAsString:msg];
                     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
                 }
-            }];
+            } forceRefresh:FALSE];
         }
         @catch (NSException *exception) {
             NSString* msg = [NSString stringWithFormat: @"While getting user email, error %@", exception];

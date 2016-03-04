@@ -14,9 +14,10 @@
 #import "AuthCompletionHandler.h"
 #import "BEMConnectionSettings.h"
 #import "SkipAuthEmailViewController.h"
-#import <GoogleOpenSource/GoogleOpenSource.h>
-#import <GoogleOpenSource/GTMOAuth2ViewControllerTouch.h>
+#import "GTMOAuth2ViewControllerTouch.h"
+#import "GTMOAuth2SignIn.h"
 #import "BEMConstants.h"
+#import "LocalNotificationManager.h"
 
 static inline NSString* NSStringFromBOOL(BOOL aBool) {
     return aBool? @"YES" : @"NO";
@@ -43,6 +44,8 @@ static AuthCompletionHandler *sharedInstance;
     }
     return sharedInstance;
 }
+
+// BEGIN: UI-based sign in methods
 
 /*
  * Note: The objects registered using these callbacks are only invoked
@@ -81,130 +84,6 @@ static AuthCompletionHandler *sharedInstance;
     }
 }
 
-/*
- * Returns a valid auth, including refreshing the access token if necessary.
- * Does not present the sign in screen to the user again, but returns an error
- * that the client can use to show the sign in screen.
- */
-
-- (void) getValidAuth:(AuthCompletionCallback) authCompletionCallback {
-    // Next, we need to check whether the user is logged in. If not, we need to re-login
-    // This will call the finishedWithAuth callback
-    GTMOAuth2Authentication* currAuth = self.currAuth;
-    if (currAuth == NULL) {
-        [self tryToAuthenticate:authCompletionCallback];
-    } else {
-        BOOL expired = ([currAuth.expirationDate compare:[NSDate date]] == NSOrderedAscending);
-        // The access token may not have expired, but the id token may not be available because the app has been restarted,
-        // so it is not in memory, and the ID token is not stored in the keychain. It is a real pain to store the ID token
-        // in the keychain through subclassing, so let's just try to refresh the token anyway
-        expired = expired || ([AuthCompletionHandler sharedInstance].getIdToken == NULL);
-        NSLog(@"currAuth = %@, canAuthorize = %@, expiresIn = %@, expirationDate = %@, expired = %@",
-              currAuth, NSStringFromBOOL(currAuth.canAuthorize), currAuth.expiresIn, currAuth.expirationDate,
-              NSStringFromBOOL(expired));
-        if (currAuth.canAuthorize != YES) {
-            NSLog(@"Unable to refresh token, trying to re-authenticate");
-            // Not sure why we would get canAuthorize be null, but I assume that we re-login in that case
-            [self tryToAuthenticate:authCompletionCallback];
-        } else {
-            if (expired) {
-                NSLog(@"Existing auth token expired, refreshing...");
-                // Need to refresh the token
-                [currAuth authorizeRequest:NULL completionHandler:^(NSError *error) {
-                    if (error != NULL) {
-                        // modify some kind of error count and notify that user needs to sign in again
-                        NSLog(@"Error while refreshing token, need to modify error count");
-                        authCompletionCallback(NULL, error);
-                    } else {
-                        NSLog(@"Refresh completion block called, refreshed token is %@", currAuth);
-                        BOOL stillExpired = ([currAuth.expirationDate compare:[NSDate date]] == NSOrderedAscending);
-                        if (stillExpired) {
-                            // Although we called refresh, the token is still expired. Let's try to call a different
-                            // refresh method
-                            NSLog(@"Existing auth token still expired after first refresh attempt, trying different attempt...");
-                            /*
-                            [currAuth authorizeRequest:NULL
-                                              delegate:self
-                                     didFinishSelector:@selector(finishRefreshSelector:)];
-                             */
-                            NSDictionary *userInfo = @{
-                                                       NSLocalizedDescriptionKey: NSLocalizedString(@"Refresh token still expired.", nil),
-                                                       NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"Unknown.", nil),
-                                                       NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString(@"Sign out and Sign in again.", nil)
-                                                       };
-                            // TODO: Make a domain and error class
-                            NSError *refreshError = [NSError errorWithDomain:errorDomain code:authFailedNeedUserInput userInfo:userInfo];
-                            authCompletionCallback(NULL, refreshError);
-                        } else {
-                            NSLog(@"Refresh is really done, posting to host");
-                            assert(error == NULL);
-                            authCompletionCallback(self.currAuth, NULL);
-                        }
-                    }
-                }];
-            } else {
-                NSLog(@"Existing auth token not expired, posting to host");
-                assert(expired == FALSE);
-                authCompletionCallback(self.currAuth, NULL);
-            }
-        }
-    }
-}
-
-- (void)tryToAuthenticate:(AuthCompletionCallback)authCompletionCallback {
-    NSLog(@"tryToAuthenticate called");
-    BOOL silentAuthResult = [self trySilentAuthentication];
-    if (silentAuthResult == NO) {
-        NSLog(@"Need user input for authentication, need to signal user somehow");
-        NSDictionary *userInfo = @{
-                                   NSLocalizedDescriptionKey: NSLocalizedString(@"User authentication failed.", nil),
-                                   NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"User information not available in keychain.", nil),
-                                   NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString(@"Need to login and authorize access to email address.", nil)
-                                   };
-        // TODO: Make a domain and error class
-        NSError *authError = [NSError errorWithDomain:errorDomain code:authFailedNeedUserInput userInfo:userInfo];
-        authCompletionCallback(NULL, authError);
-    } else {
-        NSLog(@"callback should be called, we will deal with it there");
-        // So far, callback has not taken a long time...
-        // But callback may take a long time. In that case, we may want to return early.
-        // Also, callback will invoke mCompletionHandler in a separate thread, which won't
-        // work because all callbacks have to be in the main thread for this to succeed
-        // So we say that we are done here with no data
-        // However, in the callback handler, we set the backgroundFetchInterval to 10 mins
-        // So we will be called again, and won't have to invoke this call then
-        // mCompletionHandler(NULL, NULL, NULL);
-    }
-}
-
-
-/*
- * trySilentAuthentication can be called from both the background and UI views. So it will not
- * popup the sign in view automatically. Instead, it will just return false if there is no authentication
- * token stored in the keystore.
- */
-
-- (BOOL)trySilentAuthentication {
-    if (self.currAuth == NULL) {
-        GTMOAuth2Authentication* tempAuth = [GTMOAuth2ViewControllerTouch authForGoogleFromKeychainForName:kKeychainItemName
-                                                                              clientID:self.clientId
-                                                                          clientSecret:self.clientSecret];
-        if(tempAuth.canAuthorize) {
-            self.currAuth = tempAuth;
-        } else {
-            NSLog(@"Authentication %@ stored in keychain is no longer valid", tempAuth);
-        }
-    }
-    if (self.currAuth.canAuthorize) {
-        // We are currently signed in
-        return YES;
-    }
-    
-    // We are not currently signed in
-    // TODO: Consider folding in the checks for expired tokens and
-    return NO;
-}
-
 -(UIViewController*)getSigninController {
     if ([[ConnectionSettings sharedInstance] isSkipAuth]) {
         // Display a simple view where you can enter the email address
@@ -227,38 +106,6 @@ static AuthCompletionHandler *sharedInstance;
     return viewController;
 }
 
-
-- (void)signOut {
-    if ([self.currAuth.serviceProvider isEqual:kGTMOAuth2ServiceProviderGoogle]) {
-        // remove the token from Google's servers
-        [GTMOAuth2ViewControllerTouch revokeTokenForGoogleAuthentication:self.currAuth];
-    }
-    
-    // remove the stored Google authentication from the keychain, if any
-    [GTMOAuth2ViewControllerTouch removeAuthFromKeychainForName:kKeychainItemName];
-    
-    // remove the stored DailyMotion authentication from the keychain, if any
-    [GTMOAuth2ViewControllerTouch removeAuthFromKeychainForName:kKeychainItemName];
-    
-    // Discard our retained authentication object.
-    self.currAuth = nil;
-}
-
-+ (GTMOAuth2Authentication*) createFakeAuth:(NSString*) userEmail {
-    GTMOAuth2Authentication* retAuth = [[GTMOAuth2Authentication alloc] init];
-    retAuth.userEmail = userEmail;
-    retAuth.refreshToken = userEmail;
-    retAuth.accessToken = userEmail;
-    // Make sure that it expires way in the future
-    retAuth.expirationDate = [NSDate dateWithTimeIntervalSinceNow:3600 * 365];
-    retAuth.parameters = [[NSMutableDictionary alloc] initWithDictionary:@{@"id_token" : retAuth.userEmail,
-                                                                           @"refresh_token" : retAuth.refreshToken,
-                                                                           @"access_token" : retAuth.accessToken,
-                                                                           @"email": retAuth.userEmail,
-                                                                           }];
-    return retAuth;
-}
-
 - (void)viewController:(GTMOAuth2ViewControllerTouch *)viewController
       finishedWithAuth:(GTMOAuth2Authentication *)auth
                  error:(NSError *)error {
@@ -270,7 +117,7 @@ static AuthCompletionHandler *sharedInstance;
         if ([responseData length] > 0) {
             // show the body of the server's authentication failure response
             NSString *str = [[NSString alloc] initWithData:responseData
-                                                   encoding:NSUTF8StringEncoding];
+                                                  encoding:NSUTF8StringEncoding];
             NSLog(@"%@", str);
         }
         
@@ -300,7 +147,164 @@ static AuthCompletionHandler *sharedInstance;
     [self finishedWithAuth:auth error:error usingController:viewController];
 }
 
+// END: UI-based sign in methods
+
+// BEGIN: Silent auth methods
+
+/*
+ * Read the current auth from the keychain. You can
+ */
+
+- (void) populateCurrAuth {
+    if (self.currAuth == NULL) {
+        [LocalNotificationManager addNotification:[NSString stringWithFormat:
+                                                   @"currAuth = null, reading the current value from the keychain"]];
+
+        GTMOAuth2Authentication* tempAuth = [GTMOAuth2ViewControllerTouch authForGoogleFromKeychainForName:kKeychainItemName
+                                                                                                  clientID:self.clientId
+                                                                                              clientSecret:self.clientSecret];
+        @synchronized(self.currAuth) {
+            self.currAuth = tempAuth;
+        }
+        } else {
+        [LocalNotificationManager addNotification:[NSString stringWithFormat:
+                                                   @"currAuth != null, nothing to do"]];
+    }
+}
+
+- (void) refreshToken:(AuthCompletionCallback) authCompletionCallback {
+    assert(self.currAuth != NULL);
+    GTMOAuth2Authentication* oldAuth = self.currAuth;
+    [LocalNotificationManager addNotification:[NSString stringWithFormat:
+                                               @"beginning refresh of token expiring at %@", oldAuth.expirationDate] showUI:FALSE];
+    [oldAuth authorizeRequest:NULL completionHandler:^(NSError *error) {
+        GTMOAuth2Authentication* newAuth = self.currAuth;
+                    if (error != NULL) {
+            [LocalNotificationManager addNotification:[NSString stringWithFormat:
+                                                       @"Error %@ while refreshing token, need to retry", error] showUI:TRUE];
+                        // modify some kind of error count and notify that user needs to sign in again
+                        authCompletionCallback(NULL, error);
+                    } else {
+            [LocalNotificationManager addNotification:[NSString stringWithFormat:
+                                                       @"Refresh completion block called, refreshed token expires at %@", newAuth.expirationDate] showUI:FALSE];
+            BOOL stillExpired = ([newAuth.expirationDate compare:[NSDate date]] == NSOrderedAscending);
+                        if (stillExpired) {
+                            // Although we called refresh, the token is still expired. Let's try to call a different
+                            // refresh method
+                [LocalNotificationManager addNotification:[NSString stringWithFormat:
+                                                           @"Auth token %@ still expired after first refresh attempt (expiry date = %@, now = %@), notifying user",
+                                                           newAuth, newAuth.expirationDate, [NSDate date]] showUI:TRUE];
+                            NSDictionary *userInfo = @{
+                                           NSLocalizedDescriptionKey: NSLocalizedString(@"Refresh token still expired", nil),
+                                                       NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"Unknown.", nil),
+                                                       NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString(@"Sign out and Sign in again.", nil)
+                                                       };
+                            // TODO: Make a domain and error class
+                            NSError *refreshError = [NSError errorWithDomain:errorDomain code:authFailedNeedUserInput userInfo:userInfo];
+                            authCompletionCallback(NULL, refreshError);
+                        } else {
+                [LocalNotificationManager addNotification:[NSString stringWithFormat:
+                                                           @"Refresh is really done, returning refreshed token"] showUI:FALSE];
+                authCompletionCallback(newAuth, NULL);
+            } // end: stillExpired
+        } // end: error != NULL
+    }]; // end completion block
+} // end: method
+
+/*
+ * Returns a valid auth, including refreshing the access token if necessary.
+ * Does not present the sign in screen to the user again, but returns an error
+ * that the client can use to show the sign in screen.
+ */
+
+- (void) getValidAuth:(AuthCompletionCallback) authCompletionCallback forceRefresh:(BOOL)forceRefresh {
+    [self populateCurrAuth];
+    assert(self.currAuth != NULL);
+
+    // Let's make a local copy that we can muck with until we are ready to save it back
+    GTMOAuth2Authentication* currAuth = self.currAuth;
+   
+    if (currAuth.canAuthorize == NO) {
+        // The current JWT does not have an access token or a refresh token, need to have the user sign in again.
+        [LocalNotificationManager addNotification:[NSString stringWithFormat:
+                                                   @"currAuth.canAuthorize = NO, accessToken = %@, refreshToken = %@, user needs to sign in again", currAuth.accessToken, currAuth.refreshToken] showUI:TRUE];
+        NSDictionary *userInfo = @{
+                                   NSLocalizedDescriptionKey: NSLocalizedString(@"currAuth.canAuthorize = NO", nil),
+                                   NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"currAuth.canAuthorize = NO", nil),
+                                   NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString(@"Need to login and authorize access to email address.", nil)
+                                   };
+        // TODO: Make a domain and error class
+        NSError *authError = [NSError errorWithDomain:errorDomain code:authFailedNeedUserInput userInfo:userInfo];
+        authCompletionCallback(NULL, authError);
+    } else {
+        [self checkAndRefreshToken:currAuth completionHandler:authCompletionCallback
+                      forceRefresh:forceRefresh];
+    }
+}
+
+- (void) checkAndRefreshToken:(GTMOAuth2Authentication*)currAuth completionHandler:(AuthCompletionCallback)authCompletionCallback forceRefresh:(BOOL)forceRefresh {
+
+    assert(currAuth.canAuthorize == YES);
+    BOOL expired = ([currAuth.expirationDate compare:[NSDate date]] == NSOrderedAscending);
+    // The access token may not have expired, but the id token may not be available because the app has been restarted,
+    // so it is not in memory, and the ID token is not stored in the keychain. It is a real pain to store the ID token
+    // in the keychain through subclassing, so let's just try to refresh the token anyway
+    expired = expired || ([AuthCompletionHandler sharedInstance].getIdToken == NULL);
+    [LocalNotificationManager addNotification:[NSString stringWithFormat:
+                                               @"currAuth = %@, canAuthorize = %@, expiresIn = %@, expirationDate = %@, expired = %@",
+                                               currAuth, NSStringFromBOOL(currAuth.canAuthorize), currAuth.expiresIn, currAuth.expirationDate,
+                                               NSStringFromBOOL(expired)] showUI:FALSE];
+    if (expired == YES) {
+        [LocalNotificationManager addNotification:[NSString stringWithFormat:
+                                                   @"token has expired, refreshing it"] showUI:FALSE];
+        [self refreshToken:authCompletionCallback];
+        } else {
+        if (forceRefresh == YES) {
+            [LocalNotificationManager addNotification:[NSString stringWithFormat:
+                                                       @"forceRefresh has been requested, refreshing token"] showUI:FALSE];
+            [self refreshToken:authCompletionCallback];
+}
+        [LocalNotificationManager addNotification:[NSString stringWithFormat:
+                                                   @"token is valid, returning it"] showUI:FALSE];
+        authCompletionCallback(currAuth, NULL);
+    }
+}
+
+// END: Silent auth methods
+
+- (void)signOut {
+    if ([self.currAuth.serviceProvider isEqual:kGTMOAuth2ServiceProviderGoogle]) {
+        // remove the token from Google's servers
+        [GTMOAuth2ViewControllerTouch revokeTokenForGoogleAuthentication:self.currAuth];
+    }
+    
+    // remove the stored Google authentication from the keychain, if any
+    [GTMOAuth2ViewControllerTouch removeAuthFromKeychainForName:kKeychainItemName];
+    
+    // remove the stored DailyMotion authentication from the keychain, if any
+    [GTMOAuth2ViewControllerTouch removeAuthFromKeychainForName:kKeychainItemName];
+    
+    // Discard our retained authentication object.
+    self.currAuth = nil;
+}
+
++ (GTMOAuth2Authentication*) createFakeAuth:(NSString*) userEmail {
+    GTMOAuth2Authentication* retAuth = [[GTMOAuth2Authentication alloc] init];
+    retAuth.userEmail = userEmail;
+    retAuth.refreshToken = userEmail;
+    retAuth.accessToken = userEmail;
+    // Make sure that it expires way in the future
+    retAuth.expirationDate = [NSDate dateWithTimeIntervalSinceNow:3600 * 365];
+    return retAuth;
+}
+
 -(NSString*)getIdToken {
+    if ([[ConnectionSettings sharedInstance] isSkipAuth]) {
+        if (self.currAuth != NULL) {
+            return self.currAuth.userEmail;
+    }
+}
+    // else, the real version
     if (self.currAuth != NULL) {
         if (self.currAuth.canAuthorize) {
             return [self.currAuth.parameters valueForKey:@"id_token"];
@@ -308,5 +312,7 @@ static AuthCompletionHandler *sharedInstance;
     }
     return NULL;
 }
+
+// END: Silent auth methods
 
 @end
