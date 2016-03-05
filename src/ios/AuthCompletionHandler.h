@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <GoogleOpenSource/GoogleOpenSource.h>
+#import "GTMOAuth2Authentication.h"
 
 typedef void (^AuthCompletionCallback)(GTMOAuth2Authentication *,NSError*);
 
@@ -47,12 +47,11 @@ typedef void (^AuthCompletionCallback)(GTMOAuth2Authentication *,NSError*);
 -(void)registerFinishDelegate:(id<AuthCompletionDelegate>) delegate;
 -(void)unregisterFinishDelegate:(id<AuthCompletionDelegate>) delegate;
 
--(BOOL)trySilentAuthentication;
 -(UIViewController*)getSigninController;
 -(void)signOut;
 
 - (NSString*)getIdToken;
-- (void) getValidAuth:(AuthCompletionCallback) authCompletionCallback;
+- (void) getValidAuth:(AuthCompletionCallback) authCompletionCallback forceRefresh:(BOOL)forceRefresh;
 
 - (void)viewController:(UIViewController *)viewController
       finishedWithAuth:(GTMOAuth2Authentication *)auth

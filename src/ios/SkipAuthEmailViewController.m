@@ -8,6 +8,7 @@
 
 #import "SkipAuthEmailViewController.h"
 #import "AuthCompletionHandler.h"
+#import "GTMOAuth2ViewControllerTouch.h"
 
 @interface SkipAuthEmailViewController ()
 
