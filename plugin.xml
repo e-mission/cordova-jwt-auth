@@ -66,14 +66,20 @@
     <header-file src="src/ios/AuthCompletionHandler.h"/>
     <header-file src="src/ios/AuthInspectorViewController.h"/>
     <header-file src="src/ios/SkipAuthEmailViewController.h"/>
+    <header-file src="src/ios/gtm-oauth2/GTMOAuth2*.h"/>
+    <header-file src="src/ios/gtm-session-fetcher/GTM*.h"/>
+    <header-file src="src/ios/gtm-session-fetcher/GTMSessionFetcherIOS/GTM*.h"/>
 
     <source-file src="src/ios/BEMJWTAuth.m"/>
     <source-file src="src/ios/AuthCompletionHandler.m"/>
     <source-file src="src/ios/AuthInspectorViewController.m"/>
     <source-file src="src/ios/SkipAuthEmailViewController.m"/>
+    <source-file src="src/ios/gtm-oauth2/GTMOAuth2*.m"/>
+    <source-file src="src/ios/gtm-session-fetcher/GTM*.m"/>
 
     <source-file src="src/ios/GTMOAuth2ViewTouch.xib"/>
     <source-file src="src/ios/SkipAuthEmailViewController.xib"/>
+    <source-file src="src/ios/GTMOAuth2ViewTouch.xib"/>
 
   </platform>
 </plugin>
