@@ -41,10 +41,7 @@
         <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     </config-file>
 
-    <!-- For the google auth manager
-    <framework src="src/android/google_play_dep.gradle" custom="true" type="gradleReference"/>
-    -->
-    <framework src="com.google.android.gms:play-services:8.1.0"/>
+    <framework src="com.google.android.gms:play-services-auth:8.1.0"/>
 
     <source-file src="src/android/JWTAuthPlugin.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
     <source-file src="src/android/GoogleAccountManagerAuth.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
