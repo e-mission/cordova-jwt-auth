@@ -7,15 +7,19 @@ var JWTAuth = {
      * Returns the stored user email.
      * Can return null if the user is not signed in.
      */
-    getUserEmail: function (successCallback, errorCallback) {
-        exec(successCallback, errorCallback, "JWTAuth", "getUserEmail", []);
+    getUserEmail: function () {
+        return new Promise(function(resolve, reject) {
+             exec(resolve, reject, "JWTAuth", "getUserEmail", []);
+        });
     },
 
     /*
      * Signs the user in and returns the signed in user email.
      */
-    signIn: function(successCallback, errorCallback) {
-        exec(successCallback, errorCallback, "JWTAuth", "signIn", []);
+    signIn: function() {
+        return new Promise(function(resolve, reject) {
+            exec(resolve, reject, "JWTAuth", "signIn", []);
+        });
     },
 
     getJWT: function(successCallback, errorCallback) {
