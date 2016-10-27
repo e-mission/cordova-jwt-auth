@@ -32,6 +32,7 @@
     <config-file target="res/xml/config.xml" parent="/*">
       <feature name="JWTAuth">
         <param name="android-package" value="edu.berkeley.eecs.emission.cordova.jwtauth.JWTAuthPlugin"/>
+        <param name="onload" value="true"/>
       </feature>
     </config-file>
 
@@ -53,6 +54,7 @@
     <config-file target="config.xml" parent="/*">
       <feature name="JWTAuth">
         <param name="ios-package" value="BEMJWTAuth" />
+        <param name="onload" value="true"/>
       </feature>
     </config-file>
 
