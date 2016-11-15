@@ -1,6 +1,6 @@
 #import "BEMJWTAuth.h"
 #import "AuthCompletionHandler.h"
-#import "BEMConnectionSettings.h"
+#import "LocalNotificationManager.h"
 
 @interface BEMJWTAuth () <AuthCompletionDelegate>
 @property (nonatomic, retain) CDVInvokedUrlCommand* command;
@@ -10,9 +10,8 @@
 
 - (void)pluginInitialize
 {
-    // Handle google+ sign on
-    [AuthCompletionHandler sharedInstance].clientId = [[ConnectionSettings sharedInstance] getGoogleiOSClientID];
-    [AuthCompletionHandler sharedInstance].clientSecret = [[ConnectionSettings sharedInstance] getGoogleiOSClientSecret];
+    [LocalNotificationManager addNotification:@"BEMJWTAuth:pluginInitialize singleton -> initialize completion handler"];
+    [LocalNotificationManager addNotification:[NSString stringWithFormat:@"Auth handler is %@", [AuthCompletionHandler sharedInstance]]];
 }
 
 - (void)getUserEmail:(CDVInvokedUrlCommand*)command

@@ -41,6 +41,11 @@ static AuthCompletionHandler *sharedInstance;
     if (sharedInstance == nil) {
         NSLog(@"creating new AuthCompletionHandler sharedInstance");
         sharedInstance = [AuthCompletionHandler new];
+        // Handle google+ sign on
+        sharedInstance.clientId = [[ConnectionSettings sharedInstance] getGoogleiOSClientID];
+        sharedInstance.clientSecret = [[ConnectionSettings sharedInstance] getGoogleiOSClientSecret];
+        [LocalNotificationManager addNotification:[NSString stringWithFormat:@"Finished setting clientId = %@ and clientSecret = %@", sharedInstance.clientId, sharedInstance.clientSecret]];
+
     }
     return sharedInstance;
 }
@@ -159,6 +164,9 @@ static AuthCompletionHandler *sharedInstance;
     if (self.currAuth == NULL) {
         [LocalNotificationManager addNotification:[NSString stringWithFormat:
                                                    @"currAuth = null, reading the current value from the keychain"]];
+        [LocalNotificationManager addNotification:[NSString stringWithFormat:
+                                                   @"current clientId = %@ and clientSecret = %@", self.clientId, self.clientSecret]];
+        
 
         GTMOAuth2Authentication* tempAuth = [GTMOAuth2ViewControllerTouch authForGoogleFromKeychainForName:kKeychainItemName
                                                                                                   clientID:self.clientId
