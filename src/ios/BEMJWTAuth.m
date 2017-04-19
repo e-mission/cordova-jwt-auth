@@ -1,8 +1,8 @@
 #import "BEMJWTAuth.h"
-#import "AuthCompletionHandler.h"
 #import "LocalNotificationManager.h"
+#import "BEMConnectionSettings.h"
 
-@interface BEMJWTAuth () <AuthCompletionDelegate>
+@interface BEMJWTAuth () <GIDSignInDelegate>
 @property (nonatomic, retain) CDVInvokedUrlCommand* command;
 @end
 
@@ -11,7 +11,10 @@
 - (void)pluginInitialize
 {
     [LocalNotificationManager addNotification:@"BEMJWTAuth:pluginInitialize singleton -> initialize completion handler"];
-    [LocalNotificationManager addNotification:[NSString stringWithFormat:@"Auth handler is %@", [AuthCompletionHandler sharedInstance]]];
+    GIDSignIn* signIn = [GIDSignIn sharedInstance];
+    signIn.clientID = [[ConnectionSettings sharedInstance] getGoogleiOSClientID];
+    signIn.serverClientID = [[ConnectionSettings sharedInstance] getGoogleiOSClientSecret];
+    [LocalNotificationManager addNotification:[NSString stringWithFormat:@"Finished setting clientId = %@ and serverClientID = %@", signIn.clientID, signIn.serverClientID]];
 }
 
 - (void)getUserEmail:(CDVInvokedUrlCommand*)command
@@ -19,11 +22,11 @@
     NSString* callbackId = [command callbackId];
     
     @try {
-        GTMOAuth2Authentication* currAuth = [AuthCompletionHandler sharedInstance].currAuth;
-        if (currAuth != NULL) {
+        GIDGoogleUser* currUser = [GIDSignIn sharedInstance].currentUser;
+        if (currUser != NULL) {
             CDVPluginResult* result = [CDVPluginResult
                                        resultWithStatus:CDVCommandStatus_OK
-                                       messageAsString:currAuth.userEmail];
+                                       messageAsString:currUser.profile.email];
             [self.commandDelegate sendPluginResult:result callbackId:callbackId];
         } else {
             CDVPluginResult* result = [CDVPluginResult
@@ -44,67 +47,47 @@
 
 - (void)signIn:(CDVInvokedUrlCommand*)command
 {
+    @try {
     _command = command;
-        [self presentSigninController];
+        [[GIDSignIn sharedInstance] signIn];
+}
+    @catch (NSException *exception) {
+        NSString* msg = [NSString stringWithFormat: @"While getting user email, error %@", exception];
+                    CDVPluginResult* result = [CDVPluginResult
+                                               resultWithStatus:CDVCommandStatus_ERROR
+                                               messageAsString:msg];
+        [self.commandDelegate sendPluginResult:result callbackId:[command callbackId]];
+                }
+
 }
 
 - (void)getJWT:(CDVInvokedUrlCommand*)command
 {
-    NSString* callbackId = [command callbackId];
-
-    [self.commandDelegate runInBackground:^{
-        @try {
-            /* 
-             * We don't just want to return the current value of the stored token,
-             * because it might have expired, and then we need to refresh. Instead, we
-             * call the special method just for this.
-             */
-            [[AuthCompletionHandler sharedInstance] getValidAuth:^(GTMOAuth2Authentication* auth, NSError* error) {
-                if (error == NULL) {
-                    NSString* token = [[AuthCompletionHandler sharedInstance] getIdToken];
-                    CDVPluginResult* result = [CDVPluginResult
-                                               resultWithStatus:CDVCommandStatus_OK
-                                               messageAsString:token];
-                    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
-                } else {
-                    NSString* msg = [NSString stringWithFormat: @"While getting auth token, error %@", error];
-                    CDVPluginResult* result = [CDVPluginResult
-                                               resultWithStatus:CDVCommandStatus_ERROR
-                                               messageAsString:msg];
-                    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
-                }
-            } forceRefresh:FALSE];
+    @try {
+        [[GIDSignIn sharedInstance] signInSilently];
         }
         @catch (NSException *exception) {
             NSString* msg = [NSString stringWithFormat: @"While getting user email, error %@", exception];
             CDVPluginResult* result = [CDVPluginResult
                                        resultWithStatus:CDVCommandStatus_ERROR
                                        messageAsString:msg];
-            [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+        [self.commandDelegate sendPluginResult:result callbackId:[command callbackId]];
         }
-    }];
+
 }
 
--(void) presentSigninController {
-    AuthCompletionHandler *signIn = [AuthCompletionHandler sharedInstance];
-    signIn.scope = @"https://www.googleapis.com/auth/plus.me";
-    [signIn registerFinishDelegate:self];
-    UIViewController* loginScreen = [[AuthCompletionHandler sharedInstance] getSigninController];
-    [self.viewController presentViewController:loginScreen
-                                      animated:YES
-                                    completion:NULL];
-}
 
-- (void)finishedWithAuth:(GTMOAuth2Authentication *)auth
-                   error:(NSError *)error
-                    usingController:(UIViewController *)viewController {
-    NSLog(@"SignInViewController.finishedWithAuth called with auth = %@ and error = %@", auth, error);
-    [[AuthCompletionHandler sharedInstance] unregisterFinishDelegate:self];
-    [viewController dismissViewControllerAnimated:YES completion:nil];
+-(void)signIn:(GIDSignIn*)signIn didSignInForUser:(GIDGoogleUser *)user
+    withError:(NSError *)error
+{
     if (error == NULL) {
+        NSString* resultStr = user.profile.email;
+        if ([self.command.methodName isEqual: @"getJWT"]) {
+            resultStr = user.authentication.idToken;
+        }
         CDVPluginResult* result = [CDVPluginResult
                                    resultWithStatus:CDVCommandStatus_OK
-                               messageAsString:auth.userEmail];
+                                   messageAsString:resultStr];
         [self.commandDelegate sendPluginResult:result
                                     callbackId:self.command.callbackId];
     } else {
