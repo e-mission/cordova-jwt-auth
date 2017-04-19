@@ -2,7 +2,7 @@
 #import "LocalNotificationManager.h"
 #import "BEMConnectionSettings.h"
 
-@interface BEMJWTAuth () <GIDSignInDelegate>
+@interface BEMJWTAuth () <GIDSignInDelegate, GIDSignInUIDelegate>
 @property (nonatomic, retain) CDVInvokedUrlCommand* command;
 @end
 
@@ -13,8 +13,13 @@
     [LocalNotificationManager addNotification:@"BEMJWTAuth:pluginInitialize singleton -> initialize completion handler"];
     GIDSignIn* signIn = [GIDSignIn sharedInstance];
     signIn.clientID = [[ConnectionSettings sharedInstance] getGoogleiOSClientID];
-    signIn.serverClientID = [[ConnectionSettings sharedInstance] getGoogleiOSClientSecret];
+    // signIn.serverClientID = [[ConnectionSettings sharedInstance] getGoogleiOSClientSecret];
+    signIn.delegate = self;
+    signIn.uiDelegate = self;
+    [signIn signInSilently];
     [LocalNotificationManager addNotification:[NSString stringWithFormat:@"Finished setting clientId = %@ and serverClientID = %@", signIn.clientID, signIn.serverClientID]];
+    [LocalNotificationManager addNotification:[NSString stringWithFormat:@"Finished setting delegate = %@ and uiDelegate = %@", signIn.delegate, signIn.uiDelegate]];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationLaunchedWithUrl:) name:CDVPluginHandleOpenURLNotification object:nil];
 }
 
 - (void)getUserEmail:(CDVInvokedUrlCommand*)command
@@ -98,6 +103,26 @@
         [self.commandDelegate sendPluginResult:result
                                     callbackId:_command.callbackId];
     }
+}
+
+-(void) signIn:(GIDSignIn*)signIn presentViewController:(UIViewController *)loginScreen
+{
+    [self.viewController presentViewController:loginScreen animated:YES completion:NULL];
+}
+
+-(void) signIn:(GIDSignIn*)signIn dismissViewController:(UIViewController *)loginScreen
+{
+    [self.viewController dismissViewControllerAnimated:YES completion:NULL];
+}
+
+- (void)applicationLaunchedWithUrl:(NSNotification*)notification
+{
+    NSURL* url = [notification object];
+    NSDictionary* options = [notification userInfo];
+
+    [[GIDSignIn sharedInstance] handleURL:url
+                        sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]
+                               annotation:options[UIApplicationOpenURLOptionsAnnotationKey]];
 }
 
 @end
