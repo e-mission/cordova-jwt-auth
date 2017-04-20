@@ -60,45 +60,13 @@
 
     <framework src="SystemConfiguration.framework"/>
     <framework src="Security.framework"/>
+    <framework src="GoogleSignIn" type="podspec" spec="~> 4.0.0"/>
 
     <header-file src="src/ios/BEMJWTAuth.h"/>
     <header-file src="src/ios/AuthCompletionHandler.h"/>
-    <header-file src="src/ios/SkipAuthEmailViewController.h"/>
-    <!-- GTMOAuth2 headers -->
-    <header-file src="src/ios/gtm-oauth2/GTMOAuth2Authentication.h"/>
-    <header-file src="src/ios/gtm-oauth2/GTMOAuth2SignIn.h"/>
-    <header-file src="src/ios/gtm-oauth2/GTMOAuth2ViewControllerTouch.h"/>
-    <!-- GTMOSessionFetcher general headers -->
-    <header-file src="src/ios/gtm-session-fetcher/GTMGatherInputStream.h"/>
-    <header-file src="src/ios/gtm-session-fetcher/GTMMIMEDocument.h"/>
-    <header-file src="src/ios/gtm-session-fetcher/GTMReadMonitorInputStream.h"/>
-    <header-file src="src/ios/gtm-session-fetcher/GTMSessionFetcher.h"/>
-    <header-file src="src/ios/gtm-session-fetcher/GTMSessionFetcherLogViewController.h"/>
-    <header-file src="src/ios/gtm-session-fetcher/GTMSessionFetcherLogging.h"/>
-    <header-file src="src/ios/gtm-session-fetcher/GTMSessionFetcherService.h"/>
-    <header-file src="src/ios/gtm-session-fetcher/GTMSessionUploadFetcher.h"/>
-    <!-- GTMOSessionFetcher IOS headers -->
-    <header-file src="src/ios/gtm-session-fetcher/GTMSessionFetcherIOS/GTMSessionFetcherIOS.h"/>
 
     <source-file src="src/ios/BEMJWTAuth.m"/>
     <source-file src="src/ios/AuthCompletionHandler.m"/>
-    <source-file src="src/ios/SkipAuthEmailViewController.m"/>
-    <!-- GTMOAuth2 source -->
-    <source-file src="src/ios/gtm-oauth2/GTMOAuth2Authentication.m" compiler-flags="-fno-objc-arc"/>
-    <source-file src="src/ios/gtm-oauth2/GTMOAuth2SignIn.m" compiler-flags="-fno-objc-arc"/>
-    <source-file src="src/ios/gtm-oauth2/GTMOAuth2ViewControllerTouch.m" compiler-flags="-fno-objc-arc"/>
-    <!-- GTMSessionFetcher source -->
-    <source-file src="src/ios/gtm-session-fetcher/GTMGatherInputStream.m"/>
-    <source-file src="src/ios/gtm-session-fetcher/GTMMIMEDocument.m"/>
-    <source-file src="src/ios/gtm-session-fetcher/GTMReadMonitorInputStream.m"/>
-    <source-file src="src/ios/gtm-session-fetcher/GTMSessionFetcher.m"/>
-    <source-file src="src/ios/gtm-session-fetcher/GTMSessionFetcherLogViewController.m"/>
-    <source-file src="src/ios/gtm-session-fetcher/GTMSessionFetcherLogging.m"/>
-    <source-file src="src/ios/gtm-session-fetcher/GTMSessionFetcherService.m"/>
-    <source-file src="src/ios/gtm-session-fetcher/GTMSessionUploadFetcher.m"/>
-
-    <source-file src="src/ios/gtm-oauth2/GTMOAuth2ViewTouch.xib"/>
-    <source-file src="src/ios/SkipAuthEmailViewController.xib"/>
 
   </platform>
 </plugin>
