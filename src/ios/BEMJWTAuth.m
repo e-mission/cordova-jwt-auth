@@ -2,6 +2,7 @@
 #import "LocalNotificationManager.h"
 #import "BEMConnectionSettings.h"
 #import "AuthCompletionHandler.h"
+#import "BEMBuiltinUserCache.h"
 
 @interface BEMJWTAuth () <GIDSignInUIDelegate>
 @property (nonatomic, retain) CDVInvokedUrlCommand* command;
@@ -19,16 +20,21 @@ typedef NSString* (^ProfileRetValue)(GIDGoogleUser *);
     signIn.uiDelegate = self;
     [[AuthCompletionHandler sharedInstance] getValidAuth:^(GIDGoogleUser *user, NSError *error) {
         if (user == NULL) {
-            // TODO: Refactor this into a utility function once I have a better sense of the
-            // structure. Also maybe the base notification should be configurable using javascript
-            NSDictionary* notifyOptions = @{@"id": @7356446, // RELOGIN on a phone keypad,
-                                            @"title": @"Please login to continue server communication",
-                                            @"autoclear": @TRUE,
-                                            @"at": @([NSDate date].timeIntervalSince1970 + 60), // now + 60 secs
-                                            @"data": @{@"redirectTo": @"root.main.control"}
-                                            };
-            [LocalNotificationManager showNotificationAfterSecs:@"Please login to continue server communication"
-                                                   withUserInfo:notifyOptions secsLater:60];
+            NSDictionary* introDoneResult = [[BuiltinUserCache database] getLocalStorage:@"intro_done" withMetadata:NO];
+            [LocalNotificationManager addNotification:[NSString stringWithFormat:@"intro_done result = %@", introDoneResult]];
+            if (introDoneResult != NULL) {
+
+                // TODO: Refactor this into a utility function once I have a better sense of the
+                // structure. Also maybe the base notification should be configurable using javascript
+                NSDictionary* notifyOptions = @{@"id": @7356446, // RELOGIN on a phone keypad,
+                                                @"title": @"Please login to continue server communication",
+                                                @"autoclear": @TRUE,
+                                                @"at": @([NSDate date].timeIntervalSince1970 + 60), // now + 60 secs
+                                                @"data": @{@"redirectTo": @"root.main.control"}
+                                                };
+                [LocalNotificationManager showNotificationAfterSecs:@"Please login to continue server communication"
+                                                       withUserInfo:notifyOptions secsLater:60];
+            }
         }
     }];
     [LocalNotificationManager addNotification:[NSString stringWithFormat:@"Finished setting clientId = %@ and serverClientID = %@", signIn.clientID, signIn.serverClientID]];
