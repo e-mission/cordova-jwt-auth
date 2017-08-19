@@ -1,7 +1,6 @@
 #import <Cordova/CDV.h>
-#import <GoogleSignIn/GoogleSignIn.h> 
 
-@interface BEMJWTAuth: CDVPlugin <GIDSignInUIDelegate>
+@interface BEMJWTAuth: CDVPlugin
 
 - (void) getUserEmail:(CDVInvokedUrlCommand*)command;
 - (void) signIn:(CDVInvokedUrlCommand*)command;

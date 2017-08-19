@@ -15,6 +15,18 @@
 #import "BEMConnectionSettings.h"
 #import "BEMConstants.h"
 #import "LocalNotificationManager.h"
+#import <GoogleSignIn/GoogleSignIn.h>
+
+
+typedef void (^AuthCompletionCallback)(GIDGoogleUser *,NSError*);
+typedef NSString* (^ProfileRetValue)(GIDGoogleUser *);
+
+#define NOT_SIGNED_IN_CODE 1000
+
+@interface AuthCompletionHandler () <GIDSignInDelegate, GIDSignInUIDelegate>
+// @property (atomic, retain) UIViewController* viewController;
+// @property (atomic, retain)  alreadyPresenting;
+@end
 
 @implementation AuthCompletionHandler
 
@@ -27,7 +39,15 @@ NSString* const BEMJWTAuthComplete = @"BEMJWTAuthComplete";
     if (sharedInstance == nil) {
         NSLog(@"creating new AuthCompletionHandler sharedInstance");
         sharedInstance = [AuthCompletionHandler new];
-        [GIDSignIn sharedInstance].delegate = sharedInstance;
+
+        GIDSignIn* signIn = [GIDSignIn sharedInstance];
+        signIn.clientID = [[ConnectionSettings sharedInstance] getGoogleiOSClientID];
+        // client secret is no longer required for this client
+        // signIn.serverClientID = [[ConnectionSettings sharedInstance] getGoogleiOSClientSecret];
+        signIn.delegate = sharedInstance;
+        signIn.uiDelegate = sharedInstance;
+        [LocalNotificationManager addNotification:[NSString stringWithFormat:@"Finished setting clientId = %@ and serverClientID = %@", signIn.clientID, signIn.serverClientID]];
+        [LocalNotificationManager addNotification:[NSString stringWithFormat:@"Finished setting delegate = %@ and uiDelegate = %@", signIn.delegate, signIn.uiDelegate]];
     }
     return sharedInstance;
 }
@@ -74,7 +94,81 @@ NSString* const BEMJWTAuthComplete = @"BEMJWTAuthComplete";
     }
 }
 
+-(void)handleNotification:(NSNotification *)notification
+{
+    NSURL* url = [notification object];
+    NSDictionary* options = [notification userInfo];
+    
+    [[GIDSignIn sharedInstance] handleURL:url
+                        sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]
+                               annotation:options[UIApplicationOpenURLOptionsAnnotationKey]];
+}
+
 // END: Silent auth methods
 
+// BEGIN: callbacks for extracting value from the auth completion
+
+- (void) getEmail:(AuthResultCallback) authResultCallback
+{
+    GIDGoogleUser* currUser = [GIDSignIn sharedInstance].currentUser;
+    if (currUser != NULL) {
+        authResultCallback(currUser.profile.email, NULL);
+    } else {
+        NSError* error = [NSError errorWithDomain:@"BEMAuthError"
+                                             code:NOT_SIGNED_IN_CODE
+                                         userInfo:NULL];
+        authResultCallback(NULL, error);
+    }
+}
+
+- (void) getJWT:(AuthResultCallback)authResultCallback
+{
+    [self getValidAuth:[self getRedirectedCallback:authResultCallback withRetValue:^NSString *(GIDGoogleUser *user) {
+        return user.authentication.idToken;
+    }]];
+}
+
+- (void) getExpirationDate:(AuthResultCallback)authResultCallback
+{
+    [self getValidAuth:[self getRedirectedCallback:authResultCallback withRetValue:^NSString *(GIDGoogleUser *user) {
+        return user.authentication.idTokenExpirationDate.description;
+    }]];
+}
+
+-(AuthCompletionCallback) getRedirectedCallback:(AuthResultCallback)redirCallback withRetValue:(ProfileRetValue) retValueFunctor
+{
+    return ^(GIDGoogleUser *user, NSError *error) {
+        if (error == NULL) {
+            NSString* resultStr = retValueFunctor(user);
+            redirCallback(resultStr, NULL);
+        } else {
+            redirCallback(NULL, error);
+        }
+    };
+}
+
+// END: callbacks for extracting value from the auth completion
+
+// BEGIN: UI interaction
+
+- (void) uiSignIn:(AuthResultCallback)authResultCallback
+{
+    [self registerCallback:[self getRedirectedCallback:authResultCallback
+                                          withRetValue:^NSString *(GIDGoogleUser *user) {
+                                              return user.profile.email;
+    }]];
+    [[GIDSignIn sharedInstance] signIn];
+}
+
+-(void) signIn:(GIDSignIn*)signIn presentViewController:(UIViewController *)loginScreen
+{
+    [self.viewController presentViewController:loginScreen animated:YES completion:NULL];
+}
+
+-(void) signIn:(GIDSignIn*)signIn dismissViewController:(UIViewController *)loginScreen
+{
+    [self.viewController dismissViewControllerAnimated:YES completion:NULL];
+}
+// END: UI interaction
 
 @end
