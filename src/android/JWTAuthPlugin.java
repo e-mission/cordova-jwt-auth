@@ -15,15 +15,15 @@ import edu.berkeley.eecs.emission.cordova.unifiedlogger.Log;
 
 public class JWTAuthPlugin extends CordovaPlugin {
     private static String TAG = "JWTAuthPlugin";
-    private GoogleAccountManagerAuth mgama;
+    private AuthTokenCreator tokenCreator;
     private static final int RESOLVE_ERROR_CODE = 2000;
 
     @Override
     public boolean execute(String action, JSONArray data, final CallbackContext callbackContext) throws JSONException {
-        mgama = new GoogleAccountManagerAuth(cordova.getActivity());
+        tokenCreator = AuthTokenCreationFactory.getInstance(cordova.getActivity());
         if (action.equals("getUserEmail")) {
             Activity ctxt = cordova.getActivity();
-            AuthPendingResult result = mgama.getUserEmail();
+            AuthPendingResult result = tokenCreator.getUserEmail();
             result.setResultCallback(new ResultCallback<AuthResult>() {
                 @Override
                 public void onResult(@NonNull AuthResult authResult) {
@@ -42,7 +42,7 @@ public class JWTAuthPlugin extends CordovaPlugin {
             // https://github.com/apache/cordova-android/blob/ad01d28351c13390aff4549258a0f06882df59f5/framework/src/org/apache/cordova/CordovaInterface.java#L49
             cordova.setActivityResultCallback(this);
             // This will not actually return anything - instead we will get a callback in onActivityResult
-            AuthPendingResult result = mgama.uiSignIn();
+            AuthPendingResult result = tokenCreator.uiSignIn();
             result.setResultCallback(new ResultCallback<AuthResult>() {
                 @Override
                 public void onResult(@NonNull AuthResult authResult) {
@@ -59,8 +59,7 @@ public class JWTAuthPlugin extends CordovaPlugin {
             });
             return true;
         } else if (action.equals("getJWT")) {
-            Activity ctxt = cordova.getActivity();
-            AuthPendingResult result = mgama.getServerToken();
+            AuthPendingResult result = tokenCreator.getServerToken();
             result.setResultCallback(new ResultCallback<AuthResult>() {
                 @Override
                 public void onResult(@NonNull AuthResult authResult) {
@@ -83,6 +82,6 @@ public class JWTAuthPlugin extends CordovaPlugin {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(cordova.getActivity(), TAG, "requestCode = " + requestCode + " resultCode = " + resultCode);
-        mgama.onActivityResult(requestCode, resultCode, data);
+        tokenCreator.onActivityResult(requestCode, resultCode, data);
     }
 }

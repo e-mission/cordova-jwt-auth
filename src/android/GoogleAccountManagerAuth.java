@@ -23,7 +23,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.provider.Settings;
 
-public class GoogleAccountManagerAuth {
+class GoogleAccountManagerAuth implements AuthTokenCreator {
 	private static final int REQUEST_CODE_PICK_ACCOUNT = 1000;
 	private static final int REQUEST_CODE_GET_TOKEN = 1001;
     public static String TAG = "GoogleAccountManagerAuth";
@@ -35,22 +35,17 @@ public class GoogleAccountManagerAuth {
 	// This has to be a class instance instead of a singleton like in
 	// iOS because we are not supposed to store contexts in static variables
 	// singleton pattern has static GoogleAccountManagerAuth -> mCtxt
-	public GoogleAccountManagerAuth(Activity activity) {
-		mCtxt = activity;
-		mActivity = activity;
-	}
-
-	public GoogleAccountManagerAuth(Context ctxt) {
+	GoogleAccountManagerAuth(Context ctxt) {
 		mCtxt = ctxt;
+		if (mCtxt instanceof Activity) {
+			mActivity = (Activity)mCtxt;
+		}
 	}
 
     /*
      * This just invokes the account chooser. The chosen username is returned
-     * as a callback to the passed in activity. Since the activity is different
-     * for native and cordova, we don't handle the callback here. Instead, the
-     * expectation is that the activity will set the username in the user profile.
-     * It is the activity's responsibility to do this. The LIBRARY WILL NOT DO
-     * IT.
+     * as a callback to the passed in activity, which then calls onActivityResult here
+     * to set the username.
      */
 
 	public AuthPendingResult uiSignIn() {
@@ -97,7 +92,7 @@ public class GoogleAccountManagerAuth {
 
 	/*
 	 * BEGIN: Calls to get the data
-	 * Going to configure these with listeners in order to support background operations
+	 * Going to configure these with background (pending) results in order to support background operations
 	 * It's really kind of amazing that GoogleAuthUtil doesn't enforce that, and the new
 	 * GoogleSignIn code probably will
 	 */
