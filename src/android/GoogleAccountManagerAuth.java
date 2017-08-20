@@ -6,11 +6,17 @@ import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.AccountPicker;
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.common.api.Status;
+
+import android.accounts.AccountManager;
 
 import edu.berkeley.eecs.emission.cordova.connectionsettings.ConnectionSettings;
+import edu.berkeley.eecs.emission.cordova.unifiedlogger.Log;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,14 +24,24 @@ import android.content.Intent;
 import android.provider.Settings;
 
 public class GoogleAccountManagerAuth {
-
-    Activity mCtxt;
-    int mRequestCode;
+	private static final int REQUEST_CODE_PICK_ACCOUNT = 1000;
+	private static final int REQUEST_CODE_GET_TOKEN = 1001;
     public static String TAG = "GoogleAccountManagerAuth";
 
-	public GoogleAccountManagerAuth(Activity ctxt, int requestCode) {
+	private Activity mActivity;
+	private Context mCtxt;
+	private AuthPendingResult mAuthPending;
+
+	// This has to be a class instance instead of a singleton like in
+	// iOS because we are not supposed to store contexts in static variables
+	// singleton pattern has static GoogleAccountManagerAuth -> mCtxt
+	public GoogleAccountManagerAuth(Activity activity) {
+		mCtxt = activity;
+		mActivity = activity;
+	}
+
+	public GoogleAccountManagerAuth(Context ctxt) {
 		mCtxt = ctxt;
-		mRequestCode = requestCode;
 	}
 
     /*
@@ -37,7 +53,7 @@ public class GoogleAccountManagerAuth {
      * IT.
      */
 
-	public void getUserName() {
+	public AuthPendingResult uiSignIn() {
 		try {
 			String[] accountTypes = new String[]{"com.google"};
 
@@ -50,11 +66,18 @@ public class GoogleAccountManagerAuth {
     	
 			Intent intent = AccountPicker.newChooseAccountIntent(null, null,
 					accountTypes, true, null, null, null, null);
-        
+
 			// Note that because we are starting the activity using mCtxt, the activity callback
 			// invoked will not be the one in this class, but the one in the original context.
 			// In our current flow, that is the one in the MainActivity
-			mCtxt.startActivityForResult(intent, mRequestCode);
+			mAuthPending = new AuthPendingResult();
+			if (mActivity == null) {
+				AuthResult result = new AuthResult(new Status(CommonStatusCodes.DEVELOPER_ERROR, "Context instead of activity while signing in"), null, null);
+				mAuthPending.setResult(result);
+			} else {
+				mActivity.startActivityForResult(intent, REQUEST_CODE_PICK_ACCOUNT);
+			}
+			return mAuthPending;
 		} catch (ActivityNotFoundException e) {
 			// If the user does not have a google account, then 
 			// this exception is thrown
@@ -69,30 +92,82 @@ public class GoogleAccountManagerAuth {
 			});
 			alertDialog.show();
 		}
+		return mAuthPending;
 	}
-	
-	public static String getServerToken(Context context, String userName) {
-		String serverToken = null;
-        if (ConnectionSettings.isSkipAuth(context)) {
-            System.out.println("isSkipAuth = true, serverToken = "+userName);
-            return userName;
-        }
+
+	/*
+	 * BEGIN: Calls to get the data
+	 * Going to configure these with listeners in order to support background operations
+	 * It's really kind of amazing that GoogleAuthUtil doesn't enforce that, and the new
+	 * GoogleSignIn code probably will
+	 */
+
+	public AuthPendingResult getUserEmail() {
+		AuthPendingResult authPending = new AuthPendingResult();
+		AuthResult result = new AuthResult(
+				new Status(CommonStatusCodes.SUCCESS),
+				UserProfile.getInstance(mCtxt).getUserEmail(),
+				null);
+		authPending.setResult(result);
+		return authPending;
+	}
+
+	public AuthPendingResult getServerToken() {
+		AuthPendingResult authPending = new AuthPendingResult();
 		try {
-			String AUTH_SCOPE = "audience:server:client_id:"+ConnectionSettings.getGoogleWebAppClientID(context);
-			serverToken = GoogleAuthUtil.getToken(context,
+			String serverToken = null;
+			String AUTH_SCOPE = "audience:server:client_id:"+ConnectionSettings.getGoogleWebAppClientID(mCtxt);
+			String userName = UserProfile.getInstance(mCtxt).getUserEmail();
+			serverToken = GoogleAuthUtil.getToken(mCtxt,
 					userName, AUTH_SCOPE);
+			Log.i(mCtxt, TAG, "serverToken = "+serverToken);
+			AuthResult result = new AuthResult(
+					new Status(CommonStatusCodes.SUCCESS),
+					userName,
+					serverToken);
+			authPending.setResult(result);
 		} catch (UserRecoverableAuthException e) {
-			// TODO Auto-generated catch block
-			context.startActivity(e.getIntent());
+			PendingIntent intent = PendingIntent.getActivity(mCtxt, REQUEST_CODE_GET_TOKEN,
+					e.getIntent(), PendingIntent.FLAG_UPDATE_CURRENT);
+			AuthResult result = new AuthResult(
+					new Status(CommonStatusCodes.SUCCESS, e.getLocalizedMessage(), intent),
+					null,
+					null);
+			authPending.setResult(result);
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			authPending.setResult(getErrorResult(e.getLocalizedMessage()));
 			e.printStackTrace();
 		} catch (GoogleAuthException e) {
-			// TODO Auto-generated catch block
+			authPending.setResult(getErrorResult(e.getLocalizedMessage()));
 			e.printStackTrace();
 		}
-		System.out.println("serverToken = "+serverToken);
-		return serverToken;
+		return authPending;
+	}
+
+	/*
+	 * END: Calls to get the data
+	 */
+
+	// Similar to handleNotification on iOS
+
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
+			if (resultCode == Activity.RESULT_OK) {
+				String userEmail = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+				UserProfile.getInstance(mCtxt).setUserEmail(userEmail);
+				AuthResult result = new AuthResult(
+						new Status(CommonStatusCodes.SUCCESS),
+						userEmail,
+						null);
+				mAuthPending.setResult(result);
+			} else {
+				mAuthPending.setResult(getErrorResult("Result code = " + resultCode));
+			}
+		}
+	}
+
+	private static AuthResult getErrorResult(String errorMessage) {
+		return new AuthResult(new Status(CommonStatusCodes.ERROR, errorMessage), null, null);
 	}
 }

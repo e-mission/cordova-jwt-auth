@@ -115,27 +115,7 @@ public class UserProfile {
 		this.userEmail = userEmail;
 		saveToFile();
 	}
-	public boolean isGoogleAuthDone() {
-		if (userEmail == null) {
-			loadFromFile();
-		}
-		return googleAuthDone;
-	}
-	public void setGoogleAuthDone(boolean googleAuthDone) {
-		this.googleAuthDone = googleAuthDone;
-		saveToFile();
-	}
-	public boolean isLinkWithMovesDone() {
-		if (userEmail == null) {
-			loadFromFile();
-		}
-		return linkWithMovesDone;
-	}
-	public void setLinkWithMovesDone(boolean linkWithMovesDone) {		
-		this.linkWithMovesDone = linkWithMovesDone;
-		saveToFile();
-	}
-	
+
 	public synchronized static UserProfile getInstance(Context context) {
 		if (theInstance == null) {
 			theInstance = new UserProfile(context);
