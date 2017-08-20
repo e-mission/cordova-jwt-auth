@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "AuthTokenCreator.h"
 
 @interface AuthTokenCreationFactory : NSObject
 

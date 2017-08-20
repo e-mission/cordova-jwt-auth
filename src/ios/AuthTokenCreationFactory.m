@@ -8,7 +8,7 @@
 
 #import "AuthTokenCreationFactory.h"
 #import "BEMConnectionSettings.h"
-#import "AuthCompletionHandler.h"
+#import "GoogleSigninAuth.h"
 
 @implementation AuthTokenCreationFactory
 
@@ -16,11 +16,11 @@
 {
     ConnectionSettings* settings = [ConnectionSettings sharedInstance];
     if ([settings.authMethod  isEqual: @"google-signin-lib"]) {
-        return [AuthCompletionHandler sharedInstance];
+        return [GoogleSigninAuth sharedInstance];
     } else {
         // Return google sign-in handler by default so that we know that
         // this will never return null
-        return [AuthCompletionHandler sharedInstance];
+        return [GoogleSigninAuth sharedInstance];
     }
 }
 

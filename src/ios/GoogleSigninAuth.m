@@ -1,5 +1,5 @@
 //
-//  AuthCompletionHandler.m
+//  GoogleSigninAuth.m
 //  E-Mission
 //
 //  Created by Kalyanaraman Shankari on 4/3/14.
@@ -11,7 +11,7 @@
      So we go to our familiar listener pattern
  */
 
-#import "AuthCompletionHandler.h"
+#import "GoogleSigninAuth.h"
 #import "BEMConnectionSettings.h"
 #import "BEMConstants.h"
 #import "LocalNotificationManager.h"
@@ -19,26 +19,26 @@
 #import <GoogleSignIn/GoogleSignIn.h>
 
 
-typedef void (^AuthCompletionCallback)(GIDGoogleUser *,NSError*);
+typedef void (^GoogleSigninCallback)(GIDGoogleUser *,NSError*);
 typedef NSString* (^ProfileRetValue)(GIDGoogleUser *);
 
 #define NOT_SIGNED_IN_CODE 1000
 
-@interface AuthCompletionHandler () <GIDSignInDelegate, GIDSignInUIDelegate>
+@interface GoogleSigninAuth () <GIDSignInDelegate, GIDSignInUIDelegate>
     @property (atomic, retain) CDVPlugin* mPlugin;
 @end
 
-@implementation AuthCompletionHandler
+@implementation GoogleSigninAuth
 
-static AuthCompletionHandler *sharedInstance;
+static GoogleSigninAuth *sharedInstance;
 NSString* const STATUS_KEY = @"success";
 NSString* const BEMJWTAuthComplete = @"BEMJWTAuthComplete";
 
-+ (AuthCompletionHandler*)sharedInstance
++ (GoogleSigninAuth*)sharedInstance
 {
     if (sharedInstance == nil) {
-        NSLog(@"creating new AuthCompletionHandler sharedInstance");
-        sharedInstance = [AuthCompletionHandler new];
+        NSLog(@"creating new GoogleSigninAuth sharedInstance");
+        sharedInstance = [GoogleSigninAuth new];
 
         GIDSignIn* signIn = [GIDSignIn sharedInstance];
         signIn.clientID = [[ConnectionSettings sharedInstance] getClientID];
@@ -58,13 +58,13 @@ NSString* const BEMJWTAuthComplete = @"BEMJWTAuthComplete";
  * that the client can use to show the sign in screen.
  */
 
-- (void) getValidAuth:(AuthCompletionCallback) authCompletionCallback
+- (void) getValidAuth:(GoogleSigninCallback) authCompletionCallback
 {
     [self registerCallback:authCompletionCallback];
     [[GIDSignIn sharedInstance] signInSilently];
 }
 
-- (void) registerCallback:(AuthCompletionCallback)authCompletionCallback
+- (void) registerCallback:(GoogleSigninCallback)authCompletionCallback
 {
     // pattern from `addObserverForName` docs
     // https://developer.apple.com/reference/foundation/nsnotificationcenter/1411723-addobserverforname
@@ -135,7 +135,7 @@ NSString* const BEMJWTAuthComplete = @"BEMJWTAuthComplete";
     }]];
 }
 
--(AuthCompletionCallback) getRedirectedCallback:(AuthResultCallback)redirCallback withRetValue:(ProfileRetValue) retValueFunctor
+-(GoogleSigninCallback) getRedirectedCallback:(AuthResultCallback)redirCallback withRetValue:(ProfileRetValue) retValueFunctor
 {
     return ^(GIDGoogleUser *user, NSError *error) {
         if (error == NULL) {
