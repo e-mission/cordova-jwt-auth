@@ -24,7 +24,6 @@ typedef NSString* (^ProfileRetValue)(GIDGoogleUser *);
 #define NOT_SIGNED_IN_CODE 1000
 
 @interface AuthCompletionHandler () <GIDSignInDelegate, GIDSignInUIDelegate>
-// @property (atomic, retain) UIViewController* viewController;
 // @property (atomic, retain)  alreadyPresenting;
 @end
 
@@ -41,7 +40,7 @@ NSString* const BEMJWTAuthComplete = @"BEMJWTAuthComplete";
         sharedInstance = [AuthCompletionHandler new];
 
         GIDSignIn* signIn = [GIDSignIn sharedInstance];
-        signIn.clientID = [[ConnectionSettings sharedInstance] getGoogleiOSClientID];
+        signIn.clientID = [[ConnectionSettings sharedInstance] getClientID];
         // client secret is no longer required for this client
         // signIn.serverClientID = [[ConnectionSettings sharedInstance] getGoogleiOSClientSecret];
         signIn.delegate = sharedInstance;

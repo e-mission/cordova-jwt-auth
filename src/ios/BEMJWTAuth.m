@@ -1,7 +1,8 @@
 #import "BEMJWTAuth.h"
 #import "LocalNotificationManager.h"
 #import "BEMConnectionSettings.h"
-#import "AuthCompletionHandler.h"
+#import "AuthTokenCreationFactory.h"
+#import "AuthTokenCreator.h"
 #import "BEMBuiltinUserCache.h"
 
 @interface BEMJWTAuth ()
@@ -14,7 +15,8 @@
 - (void)pluginInitialize
 {
     [LocalNotificationManager addNotification:@"BEMJWTAuth:pluginInitialize singleton -> initialize completion handler"];
-    AuthCompletionHandler* authHandler = [AuthCompletionHandler sharedInstance];
+    
+    id<AuthTokenCreator> authHandler = [AuthTokenCreationFactory getInstance];
     authHandler.viewController = self.viewController;
     [authHandler getJWT:^(NSString *token, NSError *error) {
         if (token == NULL) {
@@ -47,7 +49,7 @@
         // an error if the user did not exist. But the existing behavior is that it returns the
         // message OK with result = NULL if the user does not exist.
         // Maintaining that backwards compatible behavior for now...
-        [[AuthCompletionHandler sharedInstance] getEmail:^(NSString *userEmail, NSError *error) {
+        [[AuthTokenCreationFactory getInstance] getEmail:^(NSString *userEmail, NSError *error) {
             if (userEmail != NULL) {
                 CDVPluginResult* result = [CDVPluginResult
                                            resultWithStatus:CDVCommandStatus_OK
@@ -74,7 +76,7 @@
 - (void)signIn:(CDVInvokedUrlCommand*)command
 {
     @try {
-        [[AuthCompletionHandler sharedInstance] uiSignIn:[self getCallbackForCommand:command]];
+        [[AuthTokenCreationFactory getInstance] uiSignIn:[self getCallbackForCommand:command]];
     }
     @catch (NSException *exception) {
         NSString* msg = [NSString stringWithFormat: @"While getting user email, error %@", exception];
@@ -88,7 +90,7 @@
 - (void)getJWT:(CDVInvokedUrlCommand*)command
 {
     @try {
-        [[AuthCompletionHandler sharedInstance] getJWT:[self getCallbackForCommand:command]];
+        [[AuthTokenCreationFactory getInstance] getJWT:[self getCallbackForCommand:command]];
     }
     @catch (NSException *exception) {
             NSString* msg = [NSString stringWithFormat: @"While getting JWT, error %@", exception];
@@ -119,7 +121,7 @@
 
 - (void)applicationLaunchedWithUrl:(NSNotification*)notification
 {
-    [[AuthCompletionHandler sharedInstance] handleNotification:notification];
+    [[AuthTokenCreationFactory getInstance] handleNotification:notification];
 }
 
 @end
