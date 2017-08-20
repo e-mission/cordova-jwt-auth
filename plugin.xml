@@ -49,6 +49,8 @@
     <source-file src="src/android/UserProfile.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
     <source-file src="src/android/AuthResult.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
     <source-file src="src/android/AuthPendingResult.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
+    <source-file src="src/android/AuthTokenCreator.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
+    <source-file src="src/android/AuthTokenCreationFactory.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
   </platform>
 
   <platform name="ios">
@@ -66,9 +68,12 @@
 
     <header-file src="src/ios/BEMJWTAuth.h"/>
     <header-file src="src/ios/AuthCompletionHandler.h"/>
+    <header-file src="src/ios/AuthTokenCreator.h"/>
+    <header-file src="src/ios/AuthTokenCreationFactory.h"/>
 
     <source-file src="src/ios/BEMJWTAuth.m"/>
     <source-file src="src/ios/AuthCompletionHandler.m"/>
+    <header-file src="src/ios/AuthTokenCreationFactory.m"/>
 
   </platform>
 </plugin>
