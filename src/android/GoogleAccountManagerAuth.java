@@ -23,12 +23,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.provider.Settings;
 
+import org.apache.cordova.CordovaPlugin;
+
 class GoogleAccountManagerAuth implements AuthTokenCreator {
 	private static final int REQUEST_CODE_PICK_ACCOUNT = 1000;
 	private static final int REQUEST_CODE_GET_TOKEN = 1001;
     public static String TAG = "GoogleAccountManagerAuth";
 
-	private Activity mActivity;
+	private CordovaPlugin mPlugin;
 	private Context mCtxt;
 	private AuthPendingResult mAuthPending;
 
@@ -37,9 +39,6 @@ class GoogleAccountManagerAuth implements AuthTokenCreator {
 	// singleton pattern has static GoogleAccountManagerAuth -> mCtxt
 	GoogleAccountManagerAuth(Context ctxt) {
 		mCtxt = ctxt;
-		if (mCtxt instanceof Activity) {
-			mActivity = (Activity)mCtxt;
-		}
 	}
 
     /*
@@ -47,8 +46,9 @@ class GoogleAccountManagerAuth implements AuthTokenCreator {
      * as a callback to the passed in activity, which then calls onActivityResult here
      * to set the username.
      */
-
-	public AuthPendingResult uiSignIn() {
+	@Override
+	public AuthPendingResult uiSignIn(CordovaPlugin plugin) {
+		mPlugin = plugin;
 		try {
 			String[] accountTypes = new String[]{"com.google"};
 
@@ -66,12 +66,12 @@ class GoogleAccountManagerAuth implements AuthTokenCreator {
 			// invoked will not be the one in this class, but the one in the original context.
 			// In our current flow, that is the one in the MainActivity
 			mAuthPending = new AuthPendingResult();
-			if (mActivity == null) {
-				AuthResult result = new AuthResult(new Status(CommonStatusCodes.DEVELOPER_ERROR, "Context instead of activity while signing in"), null, null);
-				mAuthPending.setResult(result);
-			} else {
-				mActivity.startActivityForResult(intent, REQUEST_CODE_PICK_ACCOUNT);
-			}
+			// NOTE: I tried setting the result callback to an instance of GoogleAccountManagerAuth,
+			// but it has to be a subclass of CordovaPlugin
+			// https://github.com/apache/cordova-android/blob/ad01d28351c13390aff4549258a0f06882df59f5/framework/src/org/apache/cordova/CordovaInterface.java#L49
+			mPlugin.cordova.setActivityResultCallback(mPlugin);
+			// This will not actually return anything - instead we will get a callback in onActivityResult
+			mPlugin.cordova.getActivity().startActivityForResult(intent, REQUEST_CODE_PICK_ACCOUNT);
 			return mAuthPending;
 		} catch (ActivityNotFoundException e) {
 			// If the user does not have a google account, then 
@@ -96,7 +96,7 @@ class GoogleAccountManagerAuth implements AuthTokenCreator {
 	 * It's really kind of amazing that GoogleAuthUtil doesn't enforce that, and the new
 	 * GoogleSignIn code probably will
 	 */
-
+	@Override
 	public AuthPendingResult getUserEmail() {
 		AuthPendingResult authPending = new AuthPendingResult();
 		AuthResult result = new AuthResult(
@@ -107,6 +107,7 @@ class GoogleAccountManagerAuth implements AuthTokenCreator {
 		return authPending;
 	}
 
+	@Override
 	public AuthPendingResult getServerToken() {
 		AuthPendingResult authPending = new AuthPendingResult();
 		try {
@@ -145,12 +146,14 @@ class GoogleAccountManagerAuth implements AuthTokenCreator {
 	 */
 
 	// Similar to handleNotification on iOS
-
+	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
 			if (resultCode == Activity.RESULT_OK) {
 				String userEmail = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
 				UserProfile.getInstance(mCtxt).setUserEmail(userEmail);
+				mPlugin.cordova.setActivityResultCallback(null);
+				mPlugin = null;
 				AuthResult result = new AuthResult(
 						new Status(CommonStatusCodes.SUCCESS),
 						userEmail,
@@ -160,6 +163,11 @@ class GoogleAccountManagerAuth implements AuthTokenCreator {
 				mAuthPending.setResult(getErrorResult("Result code = " + resultCode));
 			}
 		}
+	}
+
+	@Override
+	public void onNewIntent(Intent intent) {
+		Log.d(mCtxt, TAG, "in google auth code, onIntent("+intent.getDataString()+" called, ignoring");
 	}
 
 	private static AuthResult getErrorResult(String errorMessage) {

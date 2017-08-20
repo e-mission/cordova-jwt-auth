@@ -1,7 +1,7 @@
 package edu.berkeley.eecs.emission.cordova.jwtauth;
 
 import android.content.Intent;
-import java.net.URL;
+import org.apache.cordova.CordovaPlugin;
 
 /**
  * Created by shankari on 8/19/17.
@@ -11,7 +11,7 @@ import java.net.URL;
 
 public interface AuthTokenCreator {
     // Method to sign in via the UI
-    public AuthPendingResult uiSignIn();
+    public AuthPendingResult uiSignIn(CordovaPlugin plugin);
 
     // Method to retrieve signed-in user information
     // Result is only guaranteed to have requested information filled in
@@ -20,4 +20,7 @@ public interface AuthTokenCreator {
 
     // Callback to get the signin information, if provided through activity result
     public void onActivityResult(int requestCode, int resultCode, Intent data);
+
+    // Callback to get the signin information, if provided through a custom URL
+    public void onNewIntent(Intent intent);
 }

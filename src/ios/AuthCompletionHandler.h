@@ -13,9 +13,6 @@
 
 +(AuthCompletionHandler*) sharedInstance;
 
-
-@property (atomic, retain) UIViewController* viewController;
-
 /*
 // Background refresh (no UI)
 // This is commented out because we want people to call the methods that

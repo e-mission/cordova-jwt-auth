@@ -17,7 +17,6 @@
     [LocalNotificationManager addNotification:@"BEMJWTAuth:pluginInitialize singleton -> initialize completion handler"];
     
     id<AuthTokenCreator> authHandler = [AuthTokenCreationFactory getInstance];
-    authHandler.viewController = self.viewController;
     [authHandler getJWT:^(NSString *token, NSError *error) {
         if (token == NULL) {
             NSDictionary* introDoneResult = [[BuiltinUserCache database] getLocalStorage:@"intro_done" withMetadata:NO];
@@ -76,7 +75,7 @@
 - (void)signIn:(CDVInvokedUrlCommand*)command
 {
     @try {
-        [[AuthTokenCreationFactory getInstance] uiSignIn:[self getCallbackForCommand:command]];
+        [[AuthTokenCreationFactory getInstance] uiSignIn:[self getCallbackForCommand:command] withPlugin:self];
     }
     @catch (NSException *exception) {
         NSString* msg = [NSString stringWithFormat: @"While getting user email, error %@", exception];

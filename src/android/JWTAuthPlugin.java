@@ -37,19 +37,13 @@ public class JWTAuthPlugin extends CordovaPlugin {
             });
             return true;
         } else if (action.equals("signIn")) {
-            // NOTE: I tried setting the result callback to an instance of GoogleAccountManagerAuth,
-            // but it has to be a subclass of CordovaPlugin
-            // https://github.com/apache/cordova-android/blob/ad01d28351c13390aff4549258a0f06882df59f5/framework/src/org/apache/cordova/CordovaInterface.java#L49
-            cordova.setActivityResultCallback(this);
-            // This will not actually return anything - instead we will get a callback in onActivityResult
-            AuthPendingResult result = tokenCreator.uiSignIn();
+            AuthPendingResult result = tokenCreator.uiSignIn(this);
             result.setResultCallback(new ResultCallback<AuthResult>() {
                 @Override
                 public void onResult(@NonNull AuthResult authResult) {
                     if (authResult.getStatus().isSuccess()) {
                         Toast.makeText(cordova.getActivity(), authResult.getEmail(),
                                 Toast.LENGTH_SHORT).show();
-                        cordova.setActivityResultCallback(null);
                         callbackContext.success(authResult.getEmail());
                     } else {
                         callbackContext.error(authResult.getStatus().getStatusCode() + " : "+
@@ -83,5 +77,11 @@ public class JWTAuthPlugin extends CordovaPlugin {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(cordova.getActivity(), TAG, "requestCode = " + requestCode + " resultCode = " + resultCode);
         tokenCreator.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        Log.d(cordova.getActivity(), TAG, "onNewIntent(" + intent.getDataString() + ")");
+        tokenCreator.onNewIntent(intent);
     }
 }

@@ -73,7 +73,7 @@
 
     <source-file src="src/ios/BEMJWTAuth.m"/>
     <source-file src="src/ios/AuthCompletionHandler.m"/>
-    <header-file src="src/ios/AuthTokenCreationFactory.m"/>
+    <source-file src="src/ios/AuthTokenCreationFactory.m"/>
 
   </platform>
 </plugin>

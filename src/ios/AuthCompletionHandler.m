@@ -15,6 +15,7 @@
 #import "BEMConnectionSettings.h"
 #import "BEMConstants.h"
 #import "LocalNotificationManager.h"
+#import <Cordova/CDV.h>
 #import <GoogleSignIn/GoogleSignIn.h>
 
 
@@ -24,7 +25,7 @@ typedef NSString* (^ProfileRetValue)(GIDGoogleUser *);
 #define NOT_SIGNED_IN_CODE 1000
 
 @interface AuthCompletionHandler () <GIDSignInDelegate, GIDSignInUIDelegate>
-// @property (atomic, retain)  alreadyPresenting;
+    @property (atomic, retain) CDVPlugin* mPlugin;
 @end
 
 @implementation AuthCompletionHandler
@@ -150,8 +151,9 @@ NSString* const BEMJWTAuthComplete = @"BEMJWTAuthComplete";
 
 // BEGIN: UI interaction
 
-- (void) uiSignIn:(AuthResultCallback)authResultCallback
+- (void) uiSignIn:(AuthResultCallback)authResultCallback withPlugin:(CDVPlugin*) plugin
 {
+    self.mPlugin = plugin;
     [self registerCallback:[self getRedirectedCallback:authResultCallback
                                           withRetValue:^NSString *(GIDGoogleUser *user) {
                                               return user.profile.email;
@@ -161,12 +163,12 @@ NSString* const BEMJWTAuthComplete = @"BEMJWTAuthComplete";
 
 -(void) signIn:(GIDSignIn*)signIn presentViewController:(UIViewController *)loginScreen
 {
-    [self.viewController presentViewController:loginScreen animated:YES completion:NULL];
+    [self.mPlugin.viewController presentViewController:loginScreen animated:YES completion:NULL];
 }
 
 -(void) signIn:(GIDSignIn*)signIn dismissViewController:(UIViewController *)loginScreen
 {
-    [self.viewController dismissViewControllerAnimated:YES completion:NULL];
+    [self.mPlugin.viewController dismissViewControllerAnimated:YES completion:NULL];
 }
 // END: UI interaction
 
