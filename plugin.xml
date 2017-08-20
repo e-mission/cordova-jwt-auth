@@ -67,12 +67,12 @@
     <framework src="GoogleSignIn" type="podspec" spec="~> 4.0.0"/>
 
     <header-file src="src/ios/BEMJWTAuth.h"/>
-    <header-file src="src/ios/AuthCompletionHandler.h"/>
+    <header-file src="src/ios/GoogleSigninAuth.h"/>
     <header-file src="src/ios/AuthTokenCreator.h"/>
     <header-file src="src/ios/AuthTokenCreationFactory.h"/>
 
     <source-file src="src/ios/BEMJWTAuth.m"/>
-    <source-file src="src/ios/AuthCompletionHandler.m"/>
+    <source-file src="src/ios/GoogleSigninAuth.m"/>
     <source-file src="src/ios/AuthTokenCreationFactory.m"/>
 
   </platform>
