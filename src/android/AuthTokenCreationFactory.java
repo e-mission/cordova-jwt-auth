@@ -15,8 +15,13 @@ public class AuthTokenCreationFactory {
         String authMethod = ConnectionSettings.getAuthMethod(ctxt);
         if ("google-authutil".equals(authMethod)) {
             return new GoogleAccountManagerAuth(ctxt);
+        } else if ("dummy-dev".equals(authMethod)) {
+            return new DummyDevAuth(ctxt);
         } else {
-            throw new RuntimeException("No auth creator found for method "+authMethod);
+            // Return dummy dev sign-in handler by default so that:
+            // - we know that this will never return null
+            // - dev users can start working without any configuration stuff
+            return new DummyDevAuth(ctxt);
         }
     }
 }
