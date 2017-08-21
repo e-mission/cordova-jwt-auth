@@ -1,25 +1,24 @@
 #import "BEMJWTAuth.h"
 #import "LocalNotificationManager.h"
 #import "BEMConnectionSettings.h"
-#import "AuthCompletionHandler.h"
+#import "AuthTokenCreationFactory.h"
+#import "AuthTokenCreator.h"
 #import "BEMBuiltinUserCache.h"
 
-@interface BEMJWTAuth () <GIDSignInUIDelegate>
+@interface BEMJWTAuth ()
 @property (nonatomic, retain) CDVInvokedUrlCommand* command;
 @end
 
 @implementation BEMJWTAuth: CDVPlugin
-typedef NSString* (^ProfileRetValue)(GIDGoogleUser *);
+
 
 - (void)pluginInitialize
 {
     [LocalNotificationManager addNotification:@"BEMJWTAuth:pluginInitialize singleton -> initialize completion handler"];
-    GIDSignIn* signIn = [GIDSignIn sharedInstance];
-    signIn.clientID = [[ConnectionSettings sharedInstance] getGoogleiOSClientID];
-    // signIn.serverClientID = [[ConnectionSettings sharedInstance] getGoogleiOSClientSecret];
-    signIn.uiDelegate = self;
-    [[AuthCompletionHandler sharedInstance] getValidAuth:^(GIDGoogleUser *user, NSError *error) {
-        if (user == NULL) {
+    
+    id<AuthTokenCreator> authHandler = [AuthTokenCreationFactory getInstance];
+    [authHandler getJWT:^(NSString *token, NSError *error) {
+        if (token == NULL) {
             NSDictionary* introDoneResult = [[BuiltinUserCache database] getLocalStorage:@"intro_done" withMetadata:NO];
             [LocalNotificationManager addNotification:[NSString stringWithFormat:@"intro_done result = %@", introDoneResult]];
             if (introDoneResult != NULL) {
@@ -37,8 +36,6 @@ typedef NSString* (^ProfileRetValue)(GIDGoogleUser *);
             }
         }
     }];
-    [LocalNotificationManager addNotification:[NSString stringWithFormat:@"Finished setting clientId = %@ and serverClientID = %@", signIn.clientID, signIn.serverClientID]];
-    [LocalNotificationManager addNotification:[NSString stringWithFormat:@"Finished setting delegate = %@ and uiDelegate = %@", signIn.delegate, signIn.uiDelegate]];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationLaunchedWithUrl:) name:CDVPluginHandleOpenURLNotification object:nil];
 }
 
@@ -47,18 +44,23 @@ typedef NSString* (^ProfileRetValue)(GIDGoogleUser *);
     NSString* callbackId = [command callbackId];
     
     @try {
-        GIDGoogleUser* currUser = [GIDSignIn sharedInstance].currentUser;
-        if (currUser != NULL) {
-            CDVPluginResult* result = [CDVPluginResult
-                                       resultWithStatus:CDVCommandStatus_OK
-                                       messageAsString:currUser.profile.email];
-            [self.commandDelegate sendPluginResult:result callbackId:callbackId];
-        } else {
-            CDVPluginResult* result = [CDVPluginResult
-                                       resultWithStatus:CDVCommandStatus_OK
-                                       messageAsString:NULL];
-            [self.commandDelegate sendPluginResult:result callbackId:callbackId];
-        }
+        // Ideally, we would re-use getCallbackForCommand here, but that would return
+        // an error if the user did not exist. But the existing behavior is that it returns the
+        // message OK with result = NULL if the user does not exist.
+        // Maintaining that backwards compatible behavior for now...
+        [[AuthTokenCreationFactory getInstance] getEmail:^(NSString *userEmail, NSError *error) {
+            if (userEmail != NULL) {
+                CDVPluginResult* result = [CDVPluginResult
+                                           resultWithStatus:CDVCommandStatus_OK
+                                           messageAsString:userEmail];
+                [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+            } else {
+                CDVPluginResult* result = [CDVPluginResult
+                                           resultWithStatus:CDVCommandStatus_OK
+                                           messageAsString:NULL];
+                [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+            }
+        }];
     }
     @catch (NSException *exception) {
         NSString* msg = [NSString stringWithFormat: @"While getting user email, error %@", exception];
@@ -73,11 +75,8 @@ typedef NSString* (^ProfileRetValue)(GIDGoogleUser *);
 - (void)signIn:(CDVInvokedUrlCommand*)command
 {
     @try {
-        [[AuthCompletionHandler sharedInstance] registerCallback:[self getCallback:^NSString *(GIDGoogleUser *user) {
-            return user.profile.email;
-        } forCommand:command]];
-        [[GIDSignIn sharedInstance] signIn];
-}
+        [[AuthTokenCreationFactory getInstance] uiSignIn:[self getCallbackForCommand:command] withPlugin:self];
+    }
     @catch (NSException *exception) {
         NSString* msg = [NSString stringWithFormat: @"While getting user email, error %@", exception];
                     CDVPluginResult* result = [CDVPluginResult
@@ -90,24 +89,20 @@ typedef NSString* (^ProfileRetValue)(GIDGoogleUser *);
 - (void)getJWT:(CDVInvokedUrlCommand*)command
 {
     @try {
-        [[AuthCompletionHandler sharedInstance] getValidAuth:[self getCallback:^NSString *(GIDGoogleUser *user) {
-            return user.authentication.idToken;
-        } forCommand:command]];
-        }
-        @catch (NSException *exception) {
-            NSString* msg = [NSString stringWithFormat: @"While getting user email, error %@", exception];
+        [[AuthTokenCreationFactory getInstance] getJWT:[self getCallbackForCommand:command]];
+    }
+    @catch (NSException *exception) {
+            NSString* msg = [NSString stringWithFormat: @"While getting JWT, error %@", exception];
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                        messageAsString:msg];
         [self.commandDelegate sendPluginResult:result callbackId:[command callbackId]];
-        }
-
+    }
 }
 
--(AuthCompletionCallback) getCallback:(ProfileRetValue) retValueFunctor forCommand:(CDVInvokedUrlCommand*)command
+-(AuthResultCallback) getCallbackForCommand:(CDVInvokedUrlCommand*)command
 {
-    return ^(GIDGoogleUser *user, NSError *error) {
+    return ^(NSString *resultStr, NSError *error) {
     if (error == NULL) {
-            NSString* resultStr = retValueFunctor(user);
             CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                    messageAsString:resultStr];
         [self.commandDelegate sendPluginResult:result
@@ -122,24 +117,10 @@ typedef NSString* (^ProfileRetValue)(GIDGoogleUser *);
     };
 }
 
--(void) signIn:(GIDSignIn*)signIn presentViewController:(UIViewController *)loginScreen
-{
-    [self.viewController presentViewController:loginScreen animated:YES completion:NULL];
-}
-
--(void) signIn:(GIDSignIn*)signIn dismissViewController:(UIViewController *)loginScreen
-{
-    [self.viewController dismissViewControllerAnimated:YES completion:NULL];
-}
 
 - (void)applicationLaunchedWithUrl:(NSNotification*)notification
 {
-    NSURL* url = [notification object];
-    NSDictionary* options = [notification userInfo];
-
-    [[GIDSignIn sharedInstance] handleURL:url
-                        sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]
-                               annotation:options[UIApplicationOpenURLOptionsAnnotationKey]];
+    [[AuthTokenCreationFactory getInstance] handleNotification:notification];
 }
 
 @end
