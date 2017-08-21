@@ -6,6 +6,7 @@ import org.json.JSONException;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.widget.Toast;
 
@@ -82,6 +83,10 @@ public class JWTAuthPlugin extends CordovaPlugin {
     @Override
     public void onNewIntent(Intent intent) {
         Log.d(cordova.getActivity(), TAG, "onNewIntent(" + intent.getDataString() + ")");
-        tokenCreator.onNewIntent(intent);
+        if (tokenCreator != null) {
+            tokenCreator.onNewIntent(intent);
+        } else {
+            Log.i(cordova.getActivity(), TAG, "tokenCreator = null, ignoring intent"+intent.getDataString());
+        }
     }
 }
