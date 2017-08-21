@@ -101,15 +101,7 @@ static DummyDevAuth *sharedInstance;
 - (void) uiSignIn:(AuthResultCallback)authResultCallback withPlugin:(CDVPlugin *)plugin
 {
     self.mResultCallback = authResultCallback;
-    NSArray<NSString*>* devJSScriptLines = @[@"var email = window.prompt('Dev mode: Enter email', '')",
-                                  // @"window.alert('email = '+email)",
-                                  @"var callbackURL = 'emission://auth?method=dummy-dev&token='+email",
-                                  // @"window.alert('callbackURL = '+callbackURL)",
-                                  @"var callbackWindow = cordova.InAppBrowser.open(callbackURL, '_system')",
-                                  @"callbackWindow.addEventListener('loadstart', function(event) {var protocol = event.url.substring(0, event.url.indexOf('://')); if (protocol == 'emission') { setTimeout(callbackWindow.close(), 5000);}})",
-                                  @"callbackWindow.addEventListener('loaderr', function(event) {alert('Error '+event.message+' loading '+event.url); callbackWindow.close();})"
-                                ];
-    NSString* devJSScript = [devJSScriptLines componentsJoinedByString:@";\n"];
+    NSString* devJSScript = @"window.cordova.plugins.BEMJWTAuth.launchDevAuth()";
     [LocalNotificationManager addNotification:@"About to execute script"];
     [LocalNotificationManager addNotification:devJSScript];
     [plugin.commandDelegate evalJs:devJSScript];

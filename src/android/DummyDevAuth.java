@@ -44,17 +44,8 @@ class DummyDevAuth implements AuthTokenCreator {
         this.mAuthPending = new AuthPendingResult();
         this.mPlugin = plugin;
 
-        String[] devJSScriptLines = {"var email = window.prompt('Dev mode: Enter email', '')",
-                // "window.alert('email = '+email)",
-                "var callbackURL = 'emission://auth?method=dummy-dev&token='+email",
-                // "window.alert('callbackURL = '+callbackURL)",
-                "var callbackWindow = cordova.InAppBrowser.open(callbackURL, '_system')",
-                "callbackWindow.addEventListener('loadstart', function(event) {var protocol = event.url.substring(0, event.url.indexOf('://')); if (protocol == 'emission') { setTimeout(callbackWindow.close(), 5000);}})",
-                "callbackWindow.addEventListener('loaderr', function(event) {alert('Error '+event.message+' loading '+event.url); callbackWindow.close();})"
-        };
-        final String devJSScript = TextUtils.join(";\n", devJSScriptLines);
-        Log.d(mCtxt, TAG, "About to execute script");
-        Log.d(mCtxt, TAG, devJSScript);
+        final String devJSScript = "window.cordova.plugins.BEMJWTAuth.launchDevAuth()";
+        Log.d(mCtxt, TAG, "About to execute script: "+devJSScript);
         final CordovaPlugin finalPlugin = plugin;
         plugin.cordova.getActivity().runOnUiThread(new Runnable() {
             @Override
