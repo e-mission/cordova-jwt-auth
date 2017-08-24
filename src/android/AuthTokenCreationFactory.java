@@ -15,6 +15,8 @@ public class AuthTokenCreationFactory {
         String authMethod = ConnectionSettings.getAuthMethod(ctxt);
         if ("google-authutil".equals(authMethod)) {
             return new GoogleAccountManagerAuth(ctxt);
+        } else if ("openid-authutil".equals(authMethod)) {
+            return new OpenIDAuth(ctxt);
         } else if ("dummy-dev".equals(authMethod)) {
             return new DummyDevAuth(ctxt);
         } else {
