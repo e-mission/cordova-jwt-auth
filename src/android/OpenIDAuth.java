@@ -4,9 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
-import android.webkit.JavascriptInterface;
-import android.webkit.URLUtil;
+
 import net.openid.appauth.*;
 
 import com.auth0.android.jwt.*;
@@ -21,7 +19,7 @@ import org.apache.cordova.CordovaPlugin;
 
 /**
  * Created by shankari on 8/21/17.
- *
+ * <p>
  * Implementation of the dummy dev auth code to allow developers to login with multiple user IDs
  * for testing + to provide another exemplar of logging in properly :)
  */
@@ -30,7 +28,7 @@ class OpenIDAuth implements AuthTokenCreator {
     private CordovaPlugin mPlugin;
     private AuthPendingResult mAuthPending;
     private AuthorizationService mAuthService;
-    private AuthStateManager mStateManager;
+    private OpenIDAuthStateManager mStateManager;
     private Context mCtxt;
 
     private static final String TAG = "OpenIDAuth";
@@ -42,7 +40,7 @@ class OpenIDAuth implements AuthTokenCreator {
     OpenIDAuth(Context ctxt) {
         mCtxt = ctxt;
         mAuthService = new AuthorizationService(mCtxt);
-        mStateManager = AuthStateManager.getInstance(mCtxt);
+        mStateManager = OpenIDAuthStateManager.getInstance(mCtxt);
     }
 
     @Override
@@ -52,32 +50,32 @@ class OpenIDAuth implements AuthTokenCreator {
 
         Uri issuerUri = Uri.parse(ConnectionSettings.getAuthValue(mCtxt, "discoveryURI"));
         AuthorizationServiceConfiguration.fetchFromIssuer(
-                        issuerUri,
-                        new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
-                            public void onFetchConfigurationCompleted(
-                                    @Nullable AuthorizationServiceConfiguration serviceConfiguration,
-                                    @Nullable AuthorizationException ex) {
-                                if (ex != null) {
-                                    Log.e(mCtxt, TAG, "failed to fetch configuration");
-                                    return;
-                                }
+                issuerUri,
+                new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
+                    public void onFetchConfigurationCompleted(
+                            @Nullable AuthorizationServiceConfiguration serviceConfiguration,
+                            @Nullable AuthorizationException ex) {
+                        if (ex != null) {
+                            Log.exception(mCtxt, TAG, ex);
+                            return;
+                        }
 
-                                // use serviceConfiguration as needed
-                                // service configuration retrieved, proceed to authorization...
-                                AuthorizationRequest.Builder authRequestBuilder = new AuthorizationRequest.Builder(
-                                        serviceConfiguration,
-                                        ConnectionSettings.getAuthValue(mCtxt, "clientID"),
-                                        ResponseTypeValues.CODE,
-                                        Uri.parse("emission.auth://oauth2redirect"))
-                                        .setScope(ConnectionSettings.getAuthValue(mCtxt, "scope"));
-                                AuthorizationRequest authRequest = authRequestBuilder.build();
+                        // use serviceConfiguration as needed
+                        // service configuration retrieved, proceed to authorization...
+                        AuthorizationRequest.Builder authRequestBuilder = new AuthorizationRequest.Builder(
+                                serviceConfiguration,
+                                ConnectionSettings.getAuthValue(mCtxt, "clientID"),
+                                ResponseTypeValues.CODE,
+                                Uri.parse("emission.auth://oauth2redirect"))
+                                .setScope(ConnectionSettings.getAuthValue(mCtxt, "scope"));
+                        AuthorizationRequest authRequest = authRequestBuilder.build();
 
-                                // AuthorizationService authService = new AuthorizationService(mCtxt);
-                                Intent authIntent = mAuthService.getAuthorizationRequestIntent(authRequest);
-                                mPlugin.cordova.setActivityResultCallback(mPlugin);
-                                mPlugin.cordova.getActivity().startActivityForResult(authIntent, RC_AUTH);
-                            }
-                        });
+                        // AuthorizationService authService = new AuthorizationService(mCtxt);
+                        Intent authIntent = mAuthService.getAuthorizationRequestIntent(authRequest);
+                        mPlugin.cordova.setActivityResultCallback(mPlugin);
+                        mPlugin.cordova.getActivity().startActivityForResult(authIntent, RC_AUTH);
+                    }
+                });
 
         return mAuthPending;
     }
@@ -89,16 +87,30 @@ class OpenIDAuth implements AuthTokenCreator {
 
     @Override
     public AuthPendingResult getServerToken() {
-        AuthPendingResult authPending = new AuthPendingResult();
+        final AuthPendingResult authPending = new AuthPendingResult();
 
-        String userName = UserProfile.getInstance(mCtxt).getUserEmail();
-        String serverToken = mStateManager.getCurrent().getIdToken();
+        final AuthState currentState = mStateManager.getCurrent();
+        currentState.performActionWithFreshTokens(mAuthService,
+                new AuthState.AuthStateAction() {
+                    @Override
+                    public void execute(@Nullable String accessToken,
+                                        @Nullable String idToken,
+                                        @Nullable AuthorizationException ex) {
+                        // Save new auth state to file
+                        mStateManager.replace(currentState);
 
-        AuthResult result = new AuthResult(
-                new Status(CommonStatusCodes.SUCCESS),
-                userName,
-                serverToken);
-        authPending.setResult(result);
+                        if (ex != null) {
+                            authPending.setResult(getErrorResult(ex.getLocalizedMessage()));
+                            return;
+                        }
+
+                        AuthResult result = new AuthResult(
+                                new Status(CommonStatusCodes.SUCCESS),
+                                getJWTEmail(idToken),
+                                idToken);
+                        authPending.setResult(result);
+                    }
+                });
 
         return authPending;
     }
@@ -111,7 +123,7 @@ class OpenIDAuth implements AuthTokenCreator {
             AuthorizationException ex = AuthorizationException.fromIntent(data);
             if (response == null) {
                 // authorization failed, check ex for more details
-                Log.i(mCtxt, TAG, "Exception occurred: " + ex.toJsonString());
+                Log.exception(mCtxt, TAG, ex);
                 return;
             }
             // authorization completed
@@ -120,7 +132,7 @@ class OpenIDAuth implements AuthTokenCreator {
                 mStateManager.updateAfterAuthorization(response, ex);
                 exchangeAuthorizationCode(response);
             } else if (ex != null) {
-                Log.d(mCtxt, TAG, "Authorization flow failed: " + ex.getMessage());
+                Log.exception(mCtxt, TAG, ex);
             } else {
                 Log.d(mCtxt, TAG, "No authorization state retained - reauthorization required");
             }
@@ -185,9 +197,13 @@ class OpenIDAuth implements AuthTokenCreator {
         return email.asString();
     }
 
+    private static AuthResult getErrorResult(String errorMessage) {
+        return new AuthResult(new Status(CommonStatusCodes.ERROR, errorMessage), null, null);
+    }
+
     @Override
     public void onNewIntent(Intent intent) {
-        Log.d(mCtxt, TAG, "in openid auth code, onIntent("+intent.getDataString()+" called, ignoring");
+        Log.d(mCtxt, TAG, "in openid auth code, onIntent(" + intent.getDataString() + " called, ignoring");
     }
 
     private AuthPendingResult readStoredUserEmail(Context ctxt) {

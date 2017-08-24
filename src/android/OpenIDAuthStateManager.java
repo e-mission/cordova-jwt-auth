@@ -38,12 +38,12 @@ import java.util.concurrent.locks.ReentrantLock;
  * This stores the instance in a shared preferences file, and provides thread-safe access and
  * mutation.
  */
-public class AuthStateManager {
+public class OpenIDAuthStateManager {
 
-    private static final AtomicReference<WeakReference<AuthStateManager>> INSTANCE_REF =
-            new AtomicReference<WeakReference<AuthStateManager>>(new WeakReference<AuthStateManager>(null));
+    private static final AtomicReference<WeakReference<OpenIDAuthStateManager>> INSTANCE_REF =
+            new AtomicReference<WeakReference<OpenIDAuthStateManager>>(new WeakReference<OpenIDAuthStateManager>(null));
 
-    private static final String TAG = "AuthStateManager";
+    private static final String TAG = "OpenIDAuthStateManager";
 
     private static final String STORE_NAME = "AuthState";
     private static final String KEY_STATE = "state";
@@ -53,17 +53,17 @@ public class AuthStateManager {
     private final AtomicReference<AuthState> mCurrentAuthState;
 
     @AnyThread
-    public static AuthStateManager getInstance(@NonNull Context context) {
-        AuthStateManager manager = INSTANCE_REF.get().get();
+    public static OpenIDAuthStateManager getInstance(@NonNull Context context) {
+        OpenIDAuthStateManager manager = INSTANCE_REF.get().get();
         if (manager == null) {
-            manager = new AuthStateManager(context.getApplicationContext());
-            INSTANCE_REF.set(new WeakReference<AuthStateManager>(manager));
+            manager = new OpenIDAuthStateManager(context.getApplicationContext());
+            INSTANCE_REF.set(new WeakReference<OpenIDAuthStateManager>(manager));
         }
 
         return manager;
     }
 
-    private AuthStateManager(Context context) {
+    private OpenIDAuthStateManager(Context context) {
         mPrefs = context.getSharedPreferences(STORE_NAME, Context.MODE_PRIVATE);
         mPrefsLock = new ReentrantLock();
         mCurrentAuthState = new AtomicReference<AuthState>();
