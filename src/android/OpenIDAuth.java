@@ -18,10 +18,10 @@ import com.google.android.gms.common.api.Status;
 import org.apache.cordova.CordovaPlugin;
 
 /**
- * Created by shankari on 8/21/17.
- * <p>
- * Implementation of the dummy dev auth code to allow developers to login with multiple user IDs
- * for testing + to provide another exemplar of logging in properly :)
+ * Created by Andrew-Tan on 8/24/17.
+ *
+ * Implementation of the generic OpenID auth code to allow developers to login with arbitrary
+ * OpenID providers and retrieve user information
  */
 
 class OpenIDAuth implements AuthTokenCreator {
@@ -82,7 +82,13 @@ class OpenIDAuth implements AuthTokenCreator {
 
     @Override
     public AuthPendingResult getUserEmail() {
-        return readStoredUserEmail(mCtxt);
+        AuthPendingResult authPending = new AuthPendingResult();
+        AuthResult result = new AuthResult(
+                new Status(CommonStatusCodes.SUCCESS),
+                UserProfile.getInstance(mCtxt).getUserEmail(),
+                null);
+        authPending.setResult(result);
+        return authPending;
     }
 
     @Override
@@ -204,15 +210,5 @@ class OpenIDAuth implements AuthTokenCreator {
     @Override
     public void onNewIntent(Intent intent) {
         Log.d(mCtxt, TAG, "in openid auth code, onIntent(" + intent.getDataString() + " called, ignoring");
-    }
-
-    private AuthPendingResult readStoredUserEmail(Context ctxt) {
-        AuthPendingResult authPending = new AuthPendingResult();
-        String userEmail = UserProfile.getInstance(ctxt).getUserEmail();
-        AuthResult result = new AuthResult(
-                new Status(CommonStatusCodes.SUCCESS),
-                userEmail, userEmail);
-        authPending.setResult(result);
-        return authPending;
     }
 }
