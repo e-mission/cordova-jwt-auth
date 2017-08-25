@@ -172,7 +172,7 @@ class OpenIDAuth implements AuthTokenCreator {
                             AuthResult authResult = new AuthResult(
                                     new Status(CommonStatusCodes.SUCCESS),
                                     userEmail,
-                                    userEmail);
+                                    idToken);
                             mAuthPending.setResult(authResult);
                         }
                     }
