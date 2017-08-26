@@ -16,13 +16,12 @@
 {
     [LocalNotificationManager addNotification:@"BEMJWTAuth:pluginInitialize singleton -> initialize completion handler"];
     
-    id<AuthTokenCreator> authHandler = [AuthTokenCreationFactory getInstance];
-    [authHandler getJWT:^(NSString *token, NSError *error) {
-        if (token == NULL) {
-            NSDictionary* introDoneResult = [[BuiltinUserCache database] getLocalStorage:@"intro_done" withMetadata:NO];
-            [LocalNotificationManager addNotification:[NSString stringWithFormat:@"intro_done result = %@", introDoneResult]];
-            if (introDoneResult != NULL) {
-
+    NSDictionary* introDoneResult = [[BuiltinUserCache database] getLocalStorage:@"intro_done" withMetadata:NO];
+    [LocalNotificationManager addNotification:[NSString stringWithFormat:@"intro_done result = %@", introDoneResult]];
+    if (introDoneResult != NULL) {
+        id<AuthTokenCreator> authHandler = [AuthTokenCreationFactory getInstance];
+        [authHandler getJWT:^(NSString *token, NSError *error) {
+            if (token == NULL) {
                 // TODO: Refactor this into a utility function once I have a better sense of the
                 // structure. Also maybe the base notification should be configurable using javascript
                 NSDictionary* notifyOptions = @{@"id": @7356446, // RELOGIN on a phone keypad,
@@ -34,8 +33,8 @@
                 [LocalNotificationManager showNotificationAfterSecs:@"Please login to continue server communication"
                                                        withUserInfo:notifyOptions secsLater:60];
             }
-        }
-    }];
+        }];
+    }
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationLaunchedWithUrl:) name:CDVPluginHandleOpenURLNotification object:nil];
 }
 

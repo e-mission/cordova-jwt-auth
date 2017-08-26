@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         id="edu.berkeley.eecs.emission.cordova.auth"
         version="1.2.0">
-
+  
   <name>JWTAuth</name>
   <description>Get the user email and associated JWT tokens from both native
         code and javascript. These are merged since the typical OAuth/JWT
