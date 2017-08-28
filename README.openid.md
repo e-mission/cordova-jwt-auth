@@ -23,7 +23,8 @@ configuration will be supported in the future.
 3. `clientID`: the client ID of the registered client. While client credential is also planning to be supported in the
 future, dynamic client registration is not yet planned to be supported.
 
-4. `scope`: scope to be requested. `openid email profile` should be sufficient at this point.
+4. `scope`: scope to be requested. `openid email profile offline_access` should be sufficient at this point. Note that
+`offline_access` should always be added in order to avoid token error when app is in background.
 
 Example
 ---
@@ -35,7 +36,7 @@ Example
       "method": "openid-authutil",
       "discoveryURI": "https://example.com/",
       "clientID": "example-client-id",
-      "scope": "openid email profile"
+      "scope": "openid email profile offline_access"
     }
   },
   ...
