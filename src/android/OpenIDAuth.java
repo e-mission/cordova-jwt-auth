@@ -127,6 +127,12 @@ class OpenIDAuth implements AuthTokenCreator {
         if (requestCode == RC_AUTH) {
             AuthorizationResponse response = AuthorizationResponse.fromIntent(data);
             AuthorizationException ex = AuthorizationException.fromIntent(data);
+
+            // Update AuthState
+            if (response != null || ex != null) {
+                mStateManager.updateAfterAuthorization(response, ex);
+            }
+
             if (response == null) {
                 // authorization failed, check ex for more details
                 Log.exception(mCtxt, TAG, ex);
