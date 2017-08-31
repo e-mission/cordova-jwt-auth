@@ -77,6 +77,10 @@ class DummyDevAuth implements AuthTokenCreator {
     public void onNewIntent(Intent intent) {
         Log.i(mCtxt, TAG, "received intent with url "+intent.getDataString());
         Uri launchUrl = intent.getData();
+        if (launchUrl == null) {
+            Log.i(mCtxt, TAG, "url = null, not a callback, early return...");
+            return;
+        }
         if (EXPECTED_HOST.equals(launchUrl.getHost())) {
             String method = launchUrl.getQueryParameter(METHOD_PARAM_KEY);
             if(method != null && EXPECTED_METHOD.equals(method)) {
