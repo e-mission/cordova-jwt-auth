@@ -2,7 +2,7 @@
 //  OpenIDAuth.m
 //  emission
 //
-//  Created by Kalyanaraman Shankari on 8/20/17.
+//  Created by Andrew Tan
 //
 //
 
@@ -40,13 +40,13 @@ static NSString *const kIssuer = @"https://accounts.open-to-all.com/auth/realms/
         Set to nil to use dynamic registration with this example.
     @see https://github.com/openid/AppAuth-iOS/blob/master/Examples/Example-iOS_ObjC/README.md
  */
-static NSString *const kClientID = @"emission-iOS-dev";
+static NSString *const kClientID = @"emission-mobile-dev";
 
 /*! @brief The OAuth redirect URI for the client @c kClientID.
     @discussion For client configuration instructions, see the README.
     @see https://github.com/openid/AppAuth-iOS/blob/master/Examples/Example-iOS_ObjC/README.md
  */
-static NSString *const kRedirectURI = @"emission:/oauth2redirect/appauthdemo";
+static NSString *const kRedirectURI = @"emission.auth://oauth2redirect";
 
 /*! @brief NSCoding key for the authState property.
  */
@@ -144,7 +144,7 @@ static NSString *const kAppAuthExampleAuthStateKey = @"authState";
         }
 
         // get access token
-        authResultCallback(accessToken, NULL);
+        authResultCallback(idToken, NULL);
     }];
 }
 
