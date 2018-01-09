@@ -73,7 +73,7 @@
   </platform>
 
   <platform name="ios">
-    
+
     <config-file target="config.xml" parent="/*">
       <feature name="JWTAuth">
         <param name="ios-package" value="BEMJWTAuth" />
@@ -84,17 +84,21 @@
     <framework src="SystemConfiguration.framework"/>
     <framework src="Security.framework"/>
     <framework src="GoogleSignIn" type="podspec" spec="~> 4.0.0"/>
+    <framework src="AppAuth" type="podspec" spec="~> 0.90.0"/>
+    <framework src="JWT" type="podspec" spec="~> 2.2.0"/>
 
     <header-file src="src/ios/BEMJWTAuth.h"/>
     <header-file src="src/ios/GoogleSigninAuth.h"/>
     <header-file src="src/ios/DummyDevAuth.h"/>
     <header-file src="src/ios/AuthTokenCreator.h"/>
     <header-file src="src/ios/AuthTokenCreationFactory.h"/>
+    <header-file src="src/ios/OpenIDAuth.h"/>
 
     <source-file src="src/ios/BEMJWTAuth.m"/>
     <source-file src="src/ios/GoogleSigninAuth.m"/>
     <source-file src="src/ios/DummyDevAuth.m"/>
     <source-file src="src/ios/AuthTokenCreationFactory.m"/>
+    <source-file src="src/ios/OpenIDAuth.m"/>
 
   </platform>
 </plugin>
