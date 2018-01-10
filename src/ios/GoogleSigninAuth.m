@@ -41,7 +41,7 @@ NSString* const BEMJWTAuthComplete = @"BEMJWTAuthComplete";
         sharedInstance = [GoogleSigninAuth new];
 
         GIDSignIn* signIn = [GIDSignIn sharedInstance];
-        signIn.clientID = [[ConnectionSettings sharedInstance] getClientID];
+        signIn.clientID = [[ConnectionSettings sharedInstance] authValueForKey:@"clientID"];
         // client secret is no longer required for this client
         // signIn.serverClientID = [[ConnectionSettings sharedInstance] getGoogleiOSClientSecret];
         signIn.delegate = sharedInstance;
