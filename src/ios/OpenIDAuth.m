@@ -10,6 +10,7 @@
 #import "AppAuth.h"
 #import <JWT/JWT.h>
 #import <Cordova/CDV.h>
+#import "BEMConnectionSettings.h"
 #import "LocalNotificationManager.h"
 
 #define STORAGE_KEY @"openid-auth"
@@ -22,6 +23,23 @@
 @property(nonatomic, nullable) OIDAuthState *_authState;
 @property (nonatomic, strong, nullable) id<OIDAuthorizationFlowSession> currentAuthorizationFlow;
 @property (atomic, retain) CDVPlugin* mPlugin;
+
+/*! @brief The OIDC issuer from which the configuration will be discovered.
+ */
+@property NSString *kIssuer;
+
+/*! @brief The OAuth client ID.
+ @discussion For client configuration instructions, see the README.
+ Set to nil to use dynamic registration with this example.
+ @see https://github.com/openid/AppAuth-iOS/blob/master/Examples/Example-iOS_ObjC/README.md
+ */
+@property NSString *kClientID;
+
+/*! @brief The OAuth redirect URI for the client @c kClientID.
+ @discussion For client configuration instructions, see the README.
+ @see https://github.com/openid/AppAuth-iOS/blob/master/Examples/Example-iOS_ObjC/README.md
+ */
+@property NSString *kRedirectURI;
 @end
 
 @implementation OpenIDAuth
@@ -29,35 +47,13 @@
 static OpenIDAuth *sharedInstance;
 
 
-
-// TODO: read from connection config so that these setting are not direcly in here.
-/*! @brief The OIDC issuer from which the configuration will be discovered.
- */
-static NSString *const kIssuer = @"https://accounts.open-to-all.com/auth/realms/OpenToAll";
-
-/*! @brief The OAuth client ID.
-    @discussion For client configuration instructions, see the README.
-        Set to nil to use dynamic registration with this example.
-    @see https://github.com/openid/AppAuth-iOS/blob/master/Examples/Example-iOS_ObjC/README.md
- */
-static NSString *const kClientID = @"emission-mobile-dev";
-
-/*! @brief The OAuth redirect URI for the client @c kClientID.
-    @discussion For client configuration instructions, see the README.
-    @see https://github.com/openid/AppAuth-iOS/blob/master/Examples/Example-iOS_ObjC/README.md
- */
-static NSString *const kRedirectURI = @"emission.auth://oauth2redirect";
-
-/*! @brief NSCoding key for the authState property.
- */
-static NSString *const kAppAuthExampleAuthStateKey = @"authState";
-
-
-
 +(OpenIDAuth*) sharedInstance {
     if (sharedInstance == nil) {
         NSLog(@"creating new OpenIDAuth sharedInstance");
         OpenIDAuth *newAuth = [OpenIDAuth new];
+        newAuth.kIssuer = [[ConnectionSettings sharedInstance] authValueForKey:@"discoveryURI"];
+        newAuth.kClientID = [[ConnectionSettings sharedInstance] authValueForKey:@"clientID"];
+        newAuth.kRedirectURI = @"emission.auth://oauth2redirect";
         [newAuth loadState];
 
         sharedInstance = newAuth;
@@ -159,7 +155,7 @@ static NSString *const kAppAuthExampleAuthStateKey = @"authState";
     self.mPlugin = plugin;
 
     // discovers endpoints
-    NSURL *issuer = [NSURL URLWithString:kIssuer];
+    NSURL *issuer = [NSURL URLWithString:self.kIssuer];
     [OIDAuthorizationService discoverServiceConfigurationForIssuer:issuer
                                                         completion:^(OIDServiceConfiguration *_Nullable configuration, NSError *_Nullable error) {
                                                             if (!configuration) {
@@ -168,10 +164,10 @@ static NSString *const kAppAuthExampleAuthStateKey = @"authState";
                                                                 return;
                                                             }
 
-                                                            if (kClientID) {
-                                                                [self doAuthWithAutoCodeExchange:configuration clientID:kClientID clientSecret:nil authResultCallback:authResultCallback];
+                                                            if (self.kClientID) {
+                                                                [self doAuthWithAutoCodeExchange:configuration clientID:self.kClientID clientSecret:nil authResultCallback:authResultCallback];
                                                             } else {
-                                                                [self logMessage:@"Error Client ID: %@", kClientID];
+                                                                [self logMessage:@"Error Client ID: %@", self.kClientID];
                                                             }
                                                         }];
 }
@@ -180,7 +176,7 @@ static NSString *const kAppAuthExampleAuthStateKey = @"authState";
                           clientID:(NSString *)clientID
                       clientSecret:(NSString *)clientSecret
                 authResultCallback:(AuthResultCallback)authResultCallback {
-    NSURL *redirectURI = [NSURL URLWithString:kRedirectURI];
+    NSURL *redirectURI = [NSURL URLWithString:self.kRedirectURI];
     // builds authentication request
     OIDAuthorizationRequest *request =
     [[OIDAuthorizationRequest alloc] initWithConfiguration:configuration
@@ -220,13 +216,13 @@ static NSString *const kAppAuthExampleAuthStateKey = @"authState";
     NSString *log = [[NSString alloc] initWithFormat:format arguments:argp];
     va_end(argp);
 
-    // appends to output log
+    // generate date string
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     dateFormatter.dateFormat = @"hh:mm:ss";
     NSString *dateString = [dateFormatter stringFromDate:[NSDate date]];
 
-    // Output to stdout
-    NSLog(@"%@: %@", dateString, log);
+    // Output to logger
+    [LocalNotificationManager addNotification:[NSString stringWithFormat:@"[iOS Auth] %@: %@", dateString, log]];
 }
 
 @end
