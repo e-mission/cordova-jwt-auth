@@ -9,6 +9,7 @@
 #import "AuthTokenCreationFactory.h"
 #import "BEMConnectionSettings.h"
 #import "GoogleSigninAuth.h"
+#import "OpenIDAuth.h"
 #import "DummyDevAuth.h"
 
 @implementation AuthTokenCreationFactory
@@ -18,6 +19,8 @@
     ConnectionSettings* settings = [ConnectionSettings sharedInstance];
     if ([settings.authMethod  isEqual: @"google-signin-lib"]) {
         return [GoogleSigninAuth sharedInstance];
+    } else if ([settings.authMethod  isEqual: @"openid-authutil"]) {
+        return [OpenIDAuth sharedInstance];
     } else if ([settings.authMethod  isEqual: @"dummy-dev"]) {
         return [DummyDevAuth sharedInstance];
     } else {
