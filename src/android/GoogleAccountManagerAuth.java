@@ -112,7 +112,7 @@ class GoogleAccountManagerAuth implements AuthTokenCreator {
 		AuthPendingResult authPending = new AuthPendingResult();
 		try {
 			String serverToken = null;
-			String AUTH_SCOPE = "audience:server:client_id:"+ConnectionSettings.getGoogleWebAppClientID(mCtxt);
+			String AUTH_SCOPE = "audience:server:client_id:"+ConnectionSettings.getAuthValue(mCtxt, "clientID");
 			String userName = UserProfile.getInstance(mCtxt).getUserEmail();
 			serverToken = GoogleAuthUtil.getToken(mCtxt,
 					userName, AUTH_SCOPE);
