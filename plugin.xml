@@ -97,7 +97,7 @@
     <framework src="SystemConfiguration.framework"/>
     <framework src="Security.framework"/>
     <framework src="GoogleSignIn" type="podspec" spec="~> 4.0.0"/>
-    <framework src="AppAuth" type="podspec" spec="~> 0.90.0"/>
+    <framework src="AppAuth" type="podspec" spec="~> 0.91.0"/>
     <framework src="JWT" type="podspec" spec="~> 2.2.0"/>
 
     <header-file src="src/ios/BEMJWTAuth.h"/>
