@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         id="edu.berkeley.eecs.emission.cordova.auth"
-        version="1.2.1">
+        version="1.3.0">
   
   <name>JWTAuth</name>
   <description>Get the user email and associated JWT tokens from both native
@@ -27,6 +27,7 @@
   <dependency id="edu.berkeley.eecs.emission.cordova.settings"
                 url="https://github.com/e-mission/cordova-connection-settings.git"/>
   -->
+  <hook type="after_plugin_install" src="hooks/android/addResourcesClassImport.js" />
 
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
