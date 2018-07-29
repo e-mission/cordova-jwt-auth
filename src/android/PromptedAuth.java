@@ -3,10 +3,9 @@ package edu.berkeley.eecs.emission.cordova.jwtauth;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.text.TextUtils;
-import android.webkit.JavascriptInterface;
-import android.webkit.URLUtil;
+import android.support.annotation.NonNull;
 
+import edu.berkeley.eecs.emission.cordova.connectionsettings.ConnectionSettings;
 import edu.berkeley.eecs.emission.cordova.unifiedlogger.Log;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -21,7 +20,7 @@ import org.apache.cordova.CordovaPlugin;
  * for testing + to provide another exemplar of logging in properly :)
  */
 
-class DummyDevAuth implements AuthTokenCreator {
+class PromptedAuth implements AuthTokenCreator {
     private CordovaPlugin mPlugin;
     private AuthPendingResult mAuthPending;
     private Context mCtxt;
@@ -30,12 +29,12 @@ class DummyDevAuth implements AuthTokenCreator {
     private static final String METHOD_PARAM_KEY = "method";
     private static final String TOKEN_PARAM_KEY = "token";
     private static final String EXPECTED_HOST = "auth";
-    private static final String EXPECTED_METHOD = "dummy-dev";
+    private static final String EXPECTED_METHOD = "prompted-auth";
 
     // This has to be a class instance instead of a singleton like in
     // iOS because we are not supposed to store contexts in static variables
     // singleton pattern has static GoogleAccountManagerAuth -> mCtxt
-    DummyDevAuth(Context ctxt) {
+    PromptedAuth(Context ctxt) {
         mCtxt = ctxt;
     }
 
@@ -44,7 +43,7 @@ class DummyDevAuth implements AuthTokenCreator {
         this.mAuthPending = new AuthPendingResult();
         this.mPlugin = plugin;
 
-        final String devJSScript = "window.cordova.plugins.BEMJWTAuth.launchDevAuth()";
+        final String devJSScript = "window.cordova.plugins.BEMJWTAuth.launchDevAuth('"+getPrompt()+"')";
         Log.d(mCtxt, TAG, "About to execute script: "+devJSScript);
         final CordovaPlugin finalPlugin = plugin;
         plugin.cordova.getActivity().runOnUiThread(new Runnable() {
@@ -58,13 +57,13 @@ class DummyDevAuth implements AuthTokenCreator {
 
     @Override
     public AuthPendingResult getUserEmail() {
-        return readStoredUserEmail(mCtxt);
+        return readStoredUserAuthEntry(mCtxt);
     }
 
     @Override
     public AuthPendingResult getServerToken() {
         // For the dummy-dev case, the token is the user email
-        return readStoredUserEmail(mCtxt);
+        return readStoredUserAuthEntry(mCtxt);
     }
 
     @Override
@@ -109,7 +108,7 @@ class DummyDevAuth implements AuthTokenCreator {
         }
     }
 
-    private AuthPendingResult readStoredUserEmail(Context ctxt) {
+    private AuthPendingResult readStoredUserAuthEntry(Context ctxt) {
         AuthPendingResult authPending = new AuthPendingResult();
         String userEmail = UserProfile.getInstance(ctxt).getUserEmail();
         AuthResult result = new AuthResult(
@@ -117,5 +116,16 @@ class DummyDevAuth implements AuthTokenCreator {
                 userEmail, userEmail);
         authPending.setResult(result);
         return authPending;
+    }
+
+    @NonNull
+    private String getPrompt() {
+        String configPrompt = ConnectionSettings.getAuthValue(mCtxt, "prompt");
+        if (configPrompt == null) {
+            // return dummy-dev prompt by default to continue supporting config-less
+            // development
+            configPrompt = "Dummy dev mode: Enter email";
+        }
+        return configPrompt;
     }
 }
