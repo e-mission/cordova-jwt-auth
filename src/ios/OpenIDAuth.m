@@ -91,7 +91,11 @@ static OpenIDAuth *sharedInstance;
 
 -(void)handleNotification:(NSNotification *)notification
 {
-    [self logMessage:@"OpenIDAuth Error: handleNotification should not be called!"];
+    // For compatibility with iOS 10 and earlier
+    NSURL* url = [notification object];
+    if ([url.scheme isEqualToString:@"emission.auth"]) {
+        [self.currentAuthorizationFlow resumeAuthorizationFlowWithURL:url];
+    }
 }
 
 - (NSString*) getStoredUsername
