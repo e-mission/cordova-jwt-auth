@@ -1,0 +1,50 @@
+{
+  "name": "em-cordova-jwt-auth",
+  "version": "1.2.1",
+  "description": "Simple package that stores all the connection settings that need to be configured",
+  "cordova": {
+    "id": "em-cordova-jwt-auth",
+    "platforms": [
+      "android",
+      "ios",
+      "windows"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/e-mission/cordova-jwt-auth.git"
+  },
+  "keywords": [
+    "emission",
+    "connection",
+    "settings",
+    "ecosystem:cordova",
+    "cordova-ios",
+    "cordova-android"
+  ],
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=3.6.0"
+    },
+    {
+      "name": "cordova-android",
+      "version": ">=6.0.0"
+    },
+    {
+      "name": "android-sdk",
+      "version": ">=26"
+    },
+    {
+      "name": "apple-ios",
+      "version": ">=10.0.0"
+    }
+  ],
+  "author": "K. Shankari",
+  "license": "BSD 3-clause",
+  "bugs": {
+    "url": "https://github.com/e-mission/cordova-jwt-auth/issues"
+  },
+  "homepage": "https://e-mission/cordova-jwt-auth"
+}
+
