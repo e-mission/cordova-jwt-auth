@@ -1,7 +1,7 @@
 {
   "name": "em-cordova-jwt-auth",
-  "version": "1.2.1",
-  "description": "Simple package that stores all the connection settings that need to be configured",
+  "version": "1.4.0",
+  "description": "Several wrappers for authentication methods",
   "cordova": {
     "id": "em-cordova-jwt-auth",
     "platforms": [

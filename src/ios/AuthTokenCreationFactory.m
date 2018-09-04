@@ -10,7 +10,7 @@
 #import "BEMConnectionSettings.h"
 #import "GoogleSigninAuth.h"
 #import "OpenIDAuth.h"
-#import "DummyDevAuth.h"
+#import "PromptedAuth.h"
 
 @implementation AuthTokenCreationFactory
 
@@ -21,13 +21,13 @@
         return [GoogleSigninAuth sharedInstance];
     } else if ([settings.authMethod  isEqual: @"openid-authutil"]) {
         return [OpenIDAuth sharedInstance];
-    } else if ([settings.authMethod  isEqual: @"dummy-dev"]) {
-        return [DummyDevAuth sharedInstance];
+    } else if ([settings.authMethod  isEqual: @"prompted-auth"]) {
+        return [PromptedAuth sharedInstance];
     } else {
         // Return dummy dev sign-in handler by default so that:
         // - we know that this will never return null
         // - dev users can start working without any configuration stuff
-        return [DummyDevAuth sharedInstance];
+        return [PromptedAuth sharedInstance];
     }
 }
 

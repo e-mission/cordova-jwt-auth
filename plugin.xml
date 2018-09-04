@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         id="edu.berkeley.eecs.emission.cordova.auth"
-        version="1.3.0">
+        version="1.4.0">
   
   <name>JWTAuth</name>
   <description>Get the user email and associated JWT tokens from both native
@@ -63,7 +63,7 @@
 
     <source-file src="src/android/JWTAuthPlugin.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
     <source-file src="src/android/GoogleAccountManagerAuth.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
-    <source-file src="src/android/DummyDevAuth.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
+    <source-file src="src/android/PromptedAuth.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
     <source-file src="src/android/UserProfile.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
     <source-file src="src/android/AuthResult.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
     <source-file src="src/android/AuthPendingResult.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
@@ -103,14 +103,14 @@
 
     <header-file src="src/ios/BEMJWTAuth.h"/>
     <header-file src="src/ios/GoogleSigninAuth.h"/>
-    <header-file src="src/ios/DummyDevAuth.h"/>
+    <header-file src="src/ios/PromptedAuth.h"/>
     <header-file src="src/ios/AuthTokenCreator.h"/>
     <header-file src="src/ios/AuthTokenCreationFactory.h"/>
     <header-file src="src/ios/OpenIDAuth.h"/>
 
     <source-file src="src/ios/BEMJWTAuth.m"/>
     <source-file src="src/ios/GoogleSigninAuth.m"/>
-    <source-file src="src/ios/DummyDevAuth.m"/>
+    <source-file src="src/ios/PromptedAuth.m"/>
     <source-file src="src/ios/AuthTokenCreationFactory.m"/>
     <source-file src="src/ios/OpenIDAuth.m"/>
 

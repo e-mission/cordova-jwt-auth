@@ -28,10 +28,10 @@ var JWTAuth = {
         });
     },
 
-    launchDevAuth: function() {
-        var email = window.prompt('Dummy dev mode: Enter email', '');
+    launchDevAuth: function(promptMsg) {
+        var email = window.prompt(promptMsg, '');
         // window.alert('email = '+email);
-        var callbackURL = 'emission://auth?method=dummy-dev&token='+email;
+        var callbackURL = 'emission://auth?method=prompted-auth&token='+email;
         // window.alert('callbackURL = '+callbackURL);
         var callbackWindow = cordova.InAppBrowser.open(callbackURL, '_system');
         // Make sure we close the window automatically

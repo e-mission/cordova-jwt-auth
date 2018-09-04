@@ -9,6 +9,6 @@
 #import <Foundation/Foundation.h>
 #import "AuthTokenCreator.h"
 
-@interface DummyDevAuth : NSObject <AuthTokenCreator>
-+ (DummyDevAuth*) sharedInstance;
+@interface PromptedAuth : NSObject <AuthTokenCreator>
++ (PromptedAuth*) sharedInstance;
 @end

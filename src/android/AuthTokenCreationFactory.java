@@ -17,13 +17,13 @@ public class AuthTokenCreationFactory {
             return new GoogleAccountManagerAuth(ctxt);
         } else if ("openid-authutil".equals(authMethod)) {
             return new OpenIDAuth(ctxt);
-        } else if ("dummy-dev".equals(authMethod)) {
-            return new DummyDevAuth(ctxt);
+        } else if ("prompted-auth".equals(authMethod)) {
+            return new PromptedAuth(ctxt);
         } else {
             // Return dummy dev sign-in handler by default so that:
             // - we know that this will never return null
             // - dev users can start working without any configuration stuff
-            return new DummyDevAuth(ctxt);
+            return new PromptedAuth(ctxt);
         }
     }
 }

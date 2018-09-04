@@ -6,30 +6,33 @@
 //
 //
 
-#import "DummyDevAuth.h"
+#import "PromptedAuth.h"
 #import "LocalNotificationManager.h"
+#import "BEMConnectionSettings.h"
 
-#define EXPECTED_METHOD @"dummy-dev"
+#define EXPECTED_METHOD @"prompted-auth"
 #define EXPECTED_HOST @"auth"
 #define METHOD_PARAM_KEY @"method"
 #define TOKEN_PARAM_KEY @"token"
 #define STORAGE_KEY @"dev-auth"
 
-@interface DummyDevAuth ()
+@interface PromptedAuth ()
 @property (atomic, copy) AuthResultCallback mResultCallback;
+@property (readonly) NSString* prompt;
 @end
 
-@implementation DummyDevAuth
+@implementation PromptedAuth
 
-static DummyDevAuth *sharedInstance;
+static PromptedAuth *sharedInstance;
 
-+(DummyDevAuth*) sharedInstance {
++(PromptedAuth*) sharedInstance {
     if (sharedInstance == NULL) {
-        NSLog(@"creating new DummyDevAuth sharedInstance");
-        sharedInstance = [DummyDevAuth new];
+        NSLog(@"creating new PromptedAuth sharedInstance");
+        sharedInstance = [PromptedAuth new];
     }
     return sharedInstance;
 }
+
 
 -(void)handleNotification:(NSNotification *)notification
 {
@@ -77,20 +80,20 @@ static DummyDevAuth *sharedInstance;
     }
 }
 
-- (NSString*) getStoredUsername
+- (NSString*) getStoredUserAuthEntry
 {
     return [[NSUserDefaults standardUserDefaults] objectForKey:STORAGE_KEY];
 }
 
 - (void) getEmail:(AuthResultCallback) authResultCallback
 {
-    authResultCallback([self getStoredUsername], NULL);
+    authResultCallback([self getStoredUserAuthEntry], NULL);
 }
 
 - (void) getJWT:(AuthResultCallback) authResultCallback
 {
     // For the dummy-dev method, token = username
-    authResultCallback([self getStoredUsername], NULL);
+    authResultCallback([self getStoredUserAuthEntry], NULL);
 }
 
 - (void) getExpirationDate:(AuthResultCallback) authResultCallback
@@ -101,11 +104,20 @@ static DummyDevAuth *sharedInstance;
 - (void) uiSignIn:(AuthResultCallback)authResultCallback withPlugin:(CDVPlugin *)plugin
 {
     self.mResultCallback = authResultCallback;
-    NSString* devJSScript = @"window.cordova.plugins.BEMJWTAuth.launchDevAuth()";
+    NSString* devJSScript = [NSString stringWithFormat:@"window.cordova.plugins.BEMJWTAuth.launchDevAuth('%@')", self.prompt];
     [LocalNotificationManager addNotification:@"About to execute script"];
     [LocalNotificationManager addNotification:devJSScript];
     [plugin.commandDelegate evalJs:devJSScript];
     
+}
+
+-(NSString*) prompt
+{
+    NSString* configPrompt = [[ConnectionSettings sharedInstance] authValueForKey:@"prompt"];
+    if (configPrompt == NULL) {
+        configPrompt = @"Dummy dev mode: Enter email";
+    }
+    return configPrompt;
 }
 
 @end
