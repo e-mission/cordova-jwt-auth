@@ -1,5 +1,5 @@
 //
-//  DummyDevAuth.h
+//  PromptedAuth.h
 //  emission
 //
 //  Created by Kalyanaraman Shankari on 8/20/17.

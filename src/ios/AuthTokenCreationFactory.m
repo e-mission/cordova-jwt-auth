@@ -24,7 +24,7 @@
     } else if ([settings.authMethod  isEqual: @"prompted-auth"]) {
         return [PromptedAuth sharedInstance];
     } else {
-        // Return dummy dev sign-in handler by default so that:
+        // Return prompted auth sign-in handler by default so that:
         // - we know that this will never return null
         // - dev users can start working without any configuration stuff
         return [PromptedAuth sharedInstance];
