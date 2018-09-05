@@ -16,7 +16,7 @@ import org.apache.cordova.CordovaPlugin;
 /**
  * Created by shankari on 8/21/17.
  *
- * Implementation of the dummy dev auth code to allow developers to login with multiple user IDs
+ * Implementation of the prompted auth code to allow developers to login with multiple user IDs
  * for testing + to provide another exemplar of logging in properly :)
  */
 
@@ -25,7 +25,7 @@ class PromptedAuth implements AuthTokenCreator {
     private AuthPendingResult mAuthPending;
     private Context mCtxt;
 
-    private static final String TAG = "DummyDevAuth";
+    private static final String TAG = "PromptedAuth";
     private static final String METHOD_PARAM_KEY = "method";
     private static final String TOKEN_PARAM_KEY = "token";
     private static final String EXPECTED_HOST = "auth";
@@ -62,14 +62,14 @@ class PromptedAuth implements AuthTokenCreator {
 
     @Override
     public AuthPendingResult getServerToken() {
-        // For the dummy-dev case, the token is the user email
+        // For the prompted-auth case, the token is the user email
         return readStoredUserAuthEntry(mCtxt);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(mCtxt, TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data.getDataString());
-        Log.i(mCtxt, TAG, "onActivityResult unused in `dummy-dev, ignoring call...");
+        Log.i(mCtxt, TAG, "onActivityResult unused in `prompted-auth, ignoring call...");
     }
 
     @Override
@@ -122,7 +122,7 @@ class PromptedAuth implements AuthTokenCreator {
     private String getPrompt() {
         String configPrompt = ConnectionSettings.getAuthValue(mCtxt, "prompt");
         if (configPrompt == null) {
-            // return dummy-dev prompt by default to continue supporting config-less
+            // return prompted-auth prompt by default to continue supporting config-less
             // development
             configPrompt = "Dummy dev mode: Enter email";
         }

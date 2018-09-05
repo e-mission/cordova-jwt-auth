@@ -1,5 +1,5 @@
 //
-//  DummyDevAuth.m
+//  PromptedAuth.m
 //  emission
 //
 //  Created by Kalyanaraman Shankari on 8/20/17.
@@ -52,7 +52,7 @@ static PromptedAuth *sharedInstance;
         NSURLQueryItem* tokenParam = queryItems[1];
         
         if (([methodParam.name isEqualToString:METHOD_PARAM_KEY]) && ([methodParam.value isEqualToString:EXPECTED_METHOD])) {
-            // For the dummy-dev method name
+            // For the prompted-auth method name
             if ([tokenParam.name isEqualToString:TOKEN_PARAM_KEY]) {
                 NSString* userName = tokenParam.value;
                 [LocalNotificationManager addNotification:
@@ -92,7 +92,7 @@ static PromptedAuth *sharedInstance;
 
 - (void) getJWT:(AuthResultCallback) authResultCallback
 {
-    // For the dummy-dev method, token = username
+    // For the prompted-auth method, token = username
     authResultCallback([self getStoredUserAuthEntry], NULL);
 }
 

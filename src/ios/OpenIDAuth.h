@@ -1,5 +1,5 @@
 //
-//  DummyDevAuth.h
+//  OpenIDAuth.h
 //  emission
 //
 //  Created by Andrew Tan
