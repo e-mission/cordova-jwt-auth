@@ -7,6 +7,7 @@
 
 @interface BEMJWTAuth ()
 @property (nonatomic, retain) CDVInvokedUrlCommand* command;
+@property id<AuthTokenCreator> token_creator;
 @end
 
 @implementation BEMJWTAuth: CDVPlugin
@@ -47,7 +48,8 @@
         // an error if the user did not exist. But the existing behavior is that it returns the
         // message OK with result = NULL if the user does not exist.
         // Maintaining that backwards compatible behavior for now...
-        [[AuthTokenCreationFactory getInstance] getEmail:^(NSString *userEmail, NSError *error) {
+        _token_creator = [AuthTokenCreationFactory getInstance];
+        [_token_creator getEmail:^(NSString *userEmail, NSError *error) {
             if (userEmail != NULL) {
                 CDVPluginResult* result = [CDVPluginResult
                                            resultWithStatus:CDVCommandStatus_OK
@@ -74,7 +76,8 @@
 - (void)signIn:(CDVInvokedUrlCommand*)command
 {
     @try {
-        [[AuthTokenCreationFactory getInstance] uiSignIn:[self getCallbackForCommand:command] withPlugin:self];
+        _token_creator = [AuthTokenCreationFactory getInstance];
+        [_token_creator uiSignIn:[self getCallbackForCommand:command] withPlugin:self];
     }
     @catch (NSException *exception) {
         NSString* msg = [NSString stringWithFormat: @"While getting user email, error %@", exception];
@@ -88,7 +91,8 @@
 - (void)getJWT:(CDVInvokedUrlCommand*)command
 {
     @try {
-        [[AuthTokenCreationFactory getInstance] getJWT:[self getCallbackForCommand:command]];
+        _token_creator = [AuthTokenCreationFactory getInstance];
+        [_token_creator getJWT:[self getCallbackForCommand:command]];
     }
     @catch (NSException *exception) {
             NSString* msg = [NSString stringWithFormat: @"While getting JWT, error %@", exception];
@@ -119,7 +123,15 @@
 
 - (void)applicationLaunchedWithUrl:(NSNotification*)notification
 {
-    [[AuthTokenCreationFactory getInstance] handleNotification:notification];
+    // Make this consistent with android to fix crashes if the user clicks on a URL
+    // without launching the app first
+    // (https://github.com/e-mission/cordova-jwt-auth/issues/33#issuecomment-432396115)
+    [LocalNotificationManager addNotification:[NSString stringWithFormat:@"BEMJWTAuth:applicationLaunchedWithUrl %@", notification]];
+    if (_token_creator != NULL) {
+        [_token_creator handleNotification:notification];
+    } else {
+        [LocalNotificationManager addNotification:[NSString stringWithFormat:@"BEMJWTAuth:tokenCreator = null, ignoring URL %@", notification]];
+    }
 }
 
 @end
