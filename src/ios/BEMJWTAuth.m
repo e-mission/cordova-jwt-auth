@@ -4,6 +4,7 @@
 #import "AuthTokenCreationFactory.h"
 #import "AuthTokenCreator.h"
 #import "BEMBuiltinUserCache.h"
+#import "PromptedAuth.h"
 
 @interface BEMJWTAuth ()
 @property (nonatomic, retain) CDVInvokedUrlCommand* command;
@@ -102,6 +103,32 @@
     }
 }
 
+- (void)setPromptedAuthToken:(CDVInvokedUrlCommand*)command
+{
+    @try {
+        _token_creator = [AuthTokenCreationFactory getInstance];
+        if ([_token_creator class] != [PromptedAuth class]) {
+            [self getCallbackForCommand:command]
+            (NULL, [NSError errorWithDomain:
+                    @"Setting programmatic token conflicts with configured auth method"
+                                       code:100 userInfo:NULL]);
+        } else {
+            NSString* email = [[command arguments] objectAtIndex:0];
+            [PromptedAuth setStoredUserAuthEntry:email];
+            [self getCallbackForCommand:command](email, NULL);
+        }
+    }
+    @catch (NSException *exception) {
+            NSString* msg = [NSString stringWithFormat: @"While setting programmatic token, error %@", exception];
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                       messageAsString:msg];
+        [self.commandDelegate sendPluginResult:result callbackId:[command callbackId]];
+    }
+}
+
+
+
+
 -(AuthResultCallback) getCallbackForCommand:(CDVInvokedUrlCommand*)command
 {
     return ^(NSString *resultStr, NSError *error) {
@@ -119,7 +146,6 @@
     }
     };
 }
-
 
 - (void)applicationLaunchedWithUrl:(NSNotification*)notification
 {
