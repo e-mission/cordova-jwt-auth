@@ -69,6 +69,17 @@ public class JWTAuthPlugin extends CordovaPlugin {
                 }
             });
             return true;
+        } else if (action.equals("setPromptedAuthToken")) {
+            if (tokenCreator.getClass() != PromptedAuth.class) {
+                callbackContext.error("Attempting to set programmatic token conflicts"
+                        + "with configured auth method");
+            }
+            String email = data.getString(0);
+            Log.d(cordova.getActivity(),TAG,
+                    "Force setting the prompted auth token = "+email);
+            UserProfile.getInstance(cordova.getActivity()).setUserEmail(email);
+            callbackContext.success(email);
+            return true;
         } else {
             return false;
         }

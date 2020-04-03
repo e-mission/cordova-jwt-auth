@@ -28,7 +28,20 @@ var JWTAuth = {
         });
     },
 
-    launchDevAuth: function(promptMsg) {
+    /*
+     * Although we generally support auth through callbacks, this is special
+     * because we may want to call it from the client to programatically create
+     * a string or token and we don't want to jump through in app browser hoops
+     * to do so.
+     */
+
+    setPromptedAuthToken(email) {
+        return new Promise(function(resolve, reject) {
+            exec(resolve, reject, "JWTAuth", "setPromptedAuthToken", [email]);
+        });
+    },
+
+    launchPromptedAuth: function(promptMsg) {
         var email = window.prompt(promptMsg, '');
         // window.alert('email = '+email);
         var callbackURL = 'emission://auth?method=prompted-auth&token='+email;

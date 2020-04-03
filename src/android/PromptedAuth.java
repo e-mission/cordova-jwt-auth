@@ -43,7 +43,7 @@ class PromptedAuth implements AuthTokenCreator {
         this.mAuthPending = new AuthPendingResult();
         this.mPlugin = plugin;
 
-        final String devJSScript = "window.cordova.plugins.BEMJWTAuth.launchDevAuth('"+getPrompt()+"')";
+        final String devJSScript = "window.cordova.plugins.BEMJWTAuth.launchPromptedAuth('"+getPrompt()+"')";
         Log.d(mCtxt, TAG, "About to execute script: "+devJSScript);
         final CordovaPlugin finalPlugin = plugin;
         plugin.cordova.getActivity().runOnUiThread(new Runnable() {

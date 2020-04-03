@@ -55,10 +55,10 @@ static PromptedAuth *sharedInstance;
             // For the prompted-auth method name
             if ([tokenParam.name isEqualToString:TOKEN_PARAM_KEY]) {
                 NSString* userName = tokenParam.value;
+                [PromptedAuth setStoredUserAuthEntry:userName];
                 [LocalNotificationManager addNotification:
                  [NSString stringWithFormat:@"in handleNotification, received userName %@",
                   userName]];
-                [[NSUserDefaults standardUserDefaults] setObject:userName forKey:STORAGE_KEY];
                 self.mResultCallback(userName, NULL);
             } else {
                 [LocalNotificationManager addNotification:
@@ -85,6 +85,11 @@ static PromptedAuth *sharedInstance;
     return [[NSUserDefaults standardUserDefaults] objectForKey:STORAGE_KEY];
 }
 
++ (void) setStoredUserAuthEntry: (NSString*)token
+{
+    [[NSUserDefaults standardUserDefaults] setObject:token forKey:STORAGE_KEY];
+}
+
 - (void) getEmail:(AuthResultCallback) authResultCallback
 {
     authResultCallback([self getStoredUserAuthEntry], NULL);
@@ -104,7 +109,7 @@ static PromptedAuth *sharedInstance;
 - (void) uiSignIn:(AuthResultCallback)authResultCallback withPlugin:(CDVPlugin *)plugin
 {
     self.mResultCallback = authResultCallback;
-    NSString* devJSScript = [NSString stringWithFormat:@"window.cordova.plugins.BEMJWTAuth.launchDevAuth('%@')", self.prompt];
+    NSString* devJSScript = [NSString stringWithFormat:@"window.cordova.plugins.BEMJWTAuth.launchPromptedAuth('%@')", self.prompt];
     [LocalNotificationManager addNotification:@"About to execute script"];
     [LocalNotificationManager addNotification:devJSScript];
     [plugin.commandDelegate evalJs:devJSScript];
