@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         id="edu.berkeley.eecs.emission.cordova.auth"
-        version="1.6.0">
+        version="1.6.1">
   
   <name>JWTAuth</name>
   <description>Get the user email and associated JWT tokens from both native
@@ -13,6 +13,7 @@
 
   <engines>
     <engine name="cordova" version=">=3.6.0"/>
+    <engine name="cordova-android" version=">=7.0.0"/>
   </engines>
 
   <asset src="www/jwtauth.js" target="js/jwtauth.js"/>
