@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         id="edu.berkeley.eecs.emission.cordova.auth"
-        version="1.6.1">
+        version="1.6.2-alpha1">
   
   <name>JWTAuth</name>
   <description>Get the user email and associated JWT tokens from both native
@@ -92,9 +92,9 @@
 
     <framework src="SystemConfiguration.framework"/>
     <framework src="Security.framework"/>
-    <framework src="GoogleSignIn" type="podspec" spec="~> 4.0.0"/>
-    <framework src="AppAuth" type="podspec" spec="~> 0.91.0"/>
-    <framework src="JWT" type="podspec" spec="~> 2.2.0"/>
+    <framework src="GoogleSignIn" type="podspec" spec="~> 5.0.0"/>
+    <framework src="AppAuth" type="podspec" spec="~> 1.2"/>
+    <framework src="JWT" type="podspec" spec="~> 3.0.0-beta.12"/>
 
     <header-file src="src/ios/BEMJWTAuth.h"/>
     <header-file src="src/ios/GoogleSigninAuth.h"/>

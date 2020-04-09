@@ -24,7 +24,7 @@ typedef NSString* (^ProfileRetValue)(GIDGoogleUser *);
 
 #define NOT_SIGNED_IN_CODE 1000
 
-@interface GoogleSigninAuth () <GIDSignInDelegate, GIDSignInUIDelegate>
+@interface GoogleSigninAuth () <GIDSignInDelegate>
     @property (atomic, retain) CDVPlugin* mPlugin;
 @end
 
@@ -45,9 +45,8 @@ NSString* const BEMJWTAuthComplete = @"BEMJWTAuthComplete";
         // client secret is no longer required for this client
         // signIn.serverClientID = [[ConnectionSettings sharedInstance] getGoogleiOSClientSecret];
         signIn.delegate = sharedInstance;
-        signIn.uiDelegate = sharedInstance;
         [LocalNotificationManager addNotification:[NSString stringWithFormat:@"Finished setting clientId = %@ and serverClientID = %@", signIn.clientID, signIn.serverClientID]];
-        [LocalNotificationManager addNotification:[NSString stringWithFormat:@"Finished setting delegate = %@ and uiDelegate = %@", signIn.delegate, signIn.uiDelegate]];
+        [LocalNotificationManager addNotification:[NSString stringWithFormat:@"Finished setting delegate = %@", signIn.delegate]];
     }
     return sharedInstance;
 }
@@ -61,7 +60,7 @@ NSString* const BEMJWTAuthComplete = @"BEMJWTAuthComplete";
 - (void) getValidAuth:(GoogleSigninCallback) authCompletionCallback
 {
     [self registerCallback:authCompletionCallback];
-    [[GIDSignIn sharedInstance] signInSilently];
+    [[GIDSignIn sharedInstance] restorePreviousSignIn];
 }
 
 - (void) registerCallback:(GoogleSigninCallback)authCompletionCallback
@@ -97,11 +96,8 @@ NSString* const BEMJWTAuthComplete = @"BEMJWTAuthComplete";
 -(void)handleNotification:(NSNotification *)notification
 {
     NSURL* url = [notification object];
-    NSDictionary* options = [notification userInfo];
     
-    [[GIDSignIn sharedInstance] handleURL:url
-                        sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]
-                               annotation:options[UIApplicationOpenURLOptionsAnnotationKey]];
+    [[GIDSignIn sharedInstance] handleURL:url];
 }
 
 // END: Silent auth methods
@@ -154,21 +150,11 @@ NSString* const BEMJWTAuthComplete = @"BEMJWTAuthComplete";
 - (void) uiSignIn:(AuthResultCallback)authResultCallback withPlugin:(CDVPlugin*) plugin
 {
     self.mPlugin = plugin;
+    [GIDSignIn sharedInstance].presentingViewController = self.mPlugin.viewController;
     [self registerCallback:[self getRedirectedCallback:authResultCallback
                                           withRetValue:^NSString *(GIDGoogleUser *user) {
                                               return user.profile.email;
     }]];
-    [[GIDSignIn sharedInstance] signIn];
-}
-
--(void) signIn:(GIDSignIn*)signIn presentViewController:(UIViewController *)loginScreen
-{
-    [self.mPlugin.viewController presentViewController:loginScreen animated:YES completion:NULL];
-}
-
--(void) signIn:(GIDSignIn*)signIn dismissViewController:(UIViewController *)loginScreen
-{
-    [self.mPlugin.viewController dismissViewControllerAnimated:YES completion:NULL];
 }
 // END: UI interaction
 
