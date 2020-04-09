@@ -21,7 +21,7 @@
  serialize to disk.
  */
 @property(nonatomic, nullable) OIDAuthState *_authState;
-@property (nonatomic, strong, nullable) id<OIDAuthorizationFlowSession> currentAuthorizationFlow;
+@property (nonatomic, strong, nullable) id<OIDExternalUserAgentSession> currentAuthorizationFlow;
 @property (atomic, retain) CDVPlugin* mPlugin;
 
 /*! @brief The OIDC issuer from which the configuration will be discovered.
@@ -94,7 +94,7 @@ static OpenIDAuth *sharedInstance;
     // For compatibility with iOS 10 and earlier
     NSURL* url = [notification object];
     if ([url.scheme isEqualToString:@"emission.auth"]) {
-        if([self.currentAuthorizationFlow resumeAuthorizationFlowWithURL:url]) {
+        if([self.currentAuthorizationFlow resumeExternalUserAgentFlowWithURL:url]) {
             self.currentAuthorizationFlow = nil;
         } else {
             [LocalNotificationManager addNotification:[NSString stringWithFormat:@"[iOS Auth] Resuming authorization flow failed with redirect URL: %@", url]];
