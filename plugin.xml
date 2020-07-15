@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
-        id="edu.berkeley.eecs.emission.cordova.auth"
+        id="cordova-plugin-em-jwt-auth"
         version="1.6.2-alpha1">
   
   <name>JWTAuth</name>
@@ -92,6 +92,13 @@
 
     <framework src="SystemConfiguration.framework"/>
     <framework src="Security.framework"/>
+    <!--
+    <podspec>
+        <pod name="GoogleSignIn" spec="~> 5.0.0" />
+        <pod name="AppAuth" spec="~> 1.2" />
+        <pod name="JWT" spec="~> 3.0.0-beta.12" />
+    </podspec>
+    -->
     <framework src="GoogleSignIn" type="podspec" spec="~> 5.0.0"/>
     <framework src="AppAuth" type="podspec" spec="~> 1.2"/>
     <framework src="JWT" type="podspec" spec="~> 3.0.0-beta.12"/>
