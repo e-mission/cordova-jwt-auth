@@ -38,7 +38,8 @@
       </feature>
     </config-file>
 
-    <framework src="com.google.android.gms:play-services-auth:11.0.1"/>
+    <framework src="com.google.android.gms:play-services-auth:$AUTH_VERSION"/>
+    <preference name="AUTH_VERSION" default="11.0.1"/>
 
     <!-- Configuration of OpenID auth plugin start -->
     <framework src="net.openid:appauth:0.7.0"/>
