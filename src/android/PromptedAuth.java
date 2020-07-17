@@ -3,7 +3,7 @@ package edu.berkeley.eecs.emission.cordova.jwtauth;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import edu.berkeley.eecs.emission.cordova.connectionsettings.ConnectionSettings;
 import edu.berkeley.eecs.emission.cordova.unifiedlogger.Log;
