@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
-        id="edu.berkeley.eecs.emission.cordova.auth"
-        version="1.6.2-alpha1">
+        id="cordova-plugin-em-jwt-auth"
+        version="1.6.2">
   
   <name>JWTAuth</name>
   <description>Get the user email and associated JWT tokens from both native
@@ -38,7 +38,8 @@
       </feature>
     </config-file>
 
-    <framework src="com.google.android.gms:play-services-auth:11.0.1"/>
+    <framework src="com.google.android.gms:play-services-auth:$AUTH_VERSION"/>
+    <preference name="AUTH_VERSION" default="11.0.1"/>
 
     <!-- Configuration of OpenID auth plugin start -->
     <framework src="net.openid:appauth:0.7.0"/>
@@ -92,6 +93,13 @@
 
     <framework src="SystemConfiguration.framework"/>
     <framework src="Security.framework"/>
+    <!--
+    <podspec>
+        <pod name="GoogleSignIn" spec="~> 5.0.0" />
+        <pod name="AppAuth" spec="~> 1.2" />
+        <pod name="JWT" spec="~> 3.0.0-beta.12" />
+    </podspec>
+    -->
     <framework src="GoogleSignIn" type="podspec" spec="~> 5.0.0"/>
     <framework src="AppAuth" type="podspec" spec="~> 1.2"/>
     <framework src="JWT" type="podspec" spec="~> 3.0.0-beta.12"/>
