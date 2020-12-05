@@ -88,12 +88,20 @@ class PromptedAuth implements AuthTokenCreator {
             if(method != null && EXPECTED_METHOD.equals(method)) {
                 String token = launchUrl.getQueryParameter(TOKEN_PARAM_KEY);
                 if (token != null) {
-                    UserProfile.getInstance(mCtxt).setUserEmail(token);
+                    try {
+                        writeStoredUserAuthEntry(mCtxt, token);
                     AuthResult authResult = new AuthResult(
                             new Status(CommonStatusCodes.SUCCESS),
                             token,
                             token);
                     mAuthPending.setResult(authResult);
+                    } catch (JSONException e) {
+                        AuthResult authResult = new AuthResult(
+                                new Status(CommonStatusCodes.ERROR),
+                                e.getLocalizedMessage(),
+                                e.getLocalizedMessage());
+                        mAuthPending.setResult(authResult);
+                    }
                 } else {
                     Log.i(mCtxt, TAG, "Received uri with query params = "+launchUrl.getQuery()
                             +" key "+TOKEN_PARAM_KEY+" missing, ignoring");
@@ -139,6 +147,12 @@ class PromptedAuth implements AuthTokenCreator {
         }
         authPending.setResult(result);
         return authPending;
+    }
+
+    protected void writeStoredUserAuthEntry(Context ctxt, String token) throws JSONException {
+        JSONObject dbStorageObject = new JSONObject();
+        dbStorageObject.put(TOKEN_PARAM_KEY, token);
+        UserCacheFactory.getUserCache(ctxt).putLocalStorage(EXPECTED_METHOD, dbStorageObject);
     }
 
     @NonNull

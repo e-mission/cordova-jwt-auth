@@ -102,7 +102,8 @@ static PromptedAuth *sharedInstance;
 
 + (void) setStoredUserAuthEntry: (NSString*)token
 {
-    [[NSUserDefaults standardUserDefaults] setObject:token forKey:STORAGE_KEY];
+    NSDictionary* dbStorageObject = @{TOKEN_PARAM_KEY: token};
+    [[BuiltinUserCache database] putLocalStorage:EXPECTED_METHOD jsonValue:dbStorageObject];
 }
 
 - (void) getEmail:(AuthResultCallback) authResultCallback
