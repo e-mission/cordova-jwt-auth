@@ -77,7 +77,7 @@ public class JWTAuthPlugin extends CordovaPlugin {
             String email = data.getString(0);
             Log.d(cordova.getActivity(),TAG,
                     "Force setting the prompted auth token = "+email);
-            UserProfile.getInstance(cordova.getActivity()).setUserEmail(email);
+            ((PromptedAuth)tokenCreator).writeStoredUserAuthEntry(cordova.getActivity(), email);
             callbackContext.success(email);
             return true;
         } else {

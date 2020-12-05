@@ -9,6 +9,7 @@
 #import "PromptedAuth.h"
 #import "LocalNotificationManager.h"
 #import "BEMConnectionSettings.h"
+#import "BEMBuiltinUserCache.h"
 
 #define EXPECTED_METHOD @"prompted-auth"
 #define EXPECTED_HOST @"auth"
@@ -82,12 +83,27 @@ static PromptedAuth *sharedInstance;
 
 - (NSString*) getStoredUserAuthEntry
 {
-    return [[NSUserDefaults standardUserDefaults] objectForKey:STORAGE_KEY];
+    NSString* token = NULL;
+    NSDictionary* dbStorageObject = [[BuiltinUserCache database] getLocalStorage:EXPECTED_METHOD withMetadata:NO];
+    if (dbStorageObject == NULL) {
+        [LocalNotificationManager addNotification:
+            [NSString stringWithFormat:@"Auth not found in local storage, copying from user profile"]];
+        NSString* profileToken = [[NSUserDefaults standardUserDefaults] objectForKey:STORAGE_KEY];
+        dbStorageObject = @{TOKEN_PARAM_KEY: profileToken};
+        [[BuiltinUserCache database] putLocalStorage:EXPECTED_METHOD jsonValue:dbStorageObject];
+        token = profileToken;
+    } else {
+        [LocalNotificationManager addNotification:
+            [NSString stringWithFormat:@"Auth found in local storage, now it should be stable"]];
+        token = dbStorageObject[TOKEN_PARAM_KEY];
+    }
+    return token;
 }
 
 + (void) setStoredUserAuthEntry: (NSString*)token
 {
-    [[NSUserDefaults standardUserDefaults] setObject:token forKey:STORAGE_KEY];
+    NSDictionary* dbStorageObject = @{TOKEN_PARAM_KEY: token};
+    [[BuiltinUserCache database] putLocalStorage:EXPECTED_METHOD jsonValue:dbStorageObject];
 }
 
 - (void) getEmail:(AuthResultCallback) authResultCallback
