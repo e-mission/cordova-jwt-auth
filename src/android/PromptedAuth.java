@@ -7,11 +7,14 @@ import androidx.annotation.NonNull;
 
 import edu.berkeley.eecs.emission.cordova.connectionsettings.ConnectionSettings;
 import edu.berkeley.eecs.emission.cordova.unifiedlogger.Log;
+import edu.berkeley.eecs.emission.cordova.usercache.UserCacheFactory;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.common.api.Status;
 
 import org.apache.cordova.CordovaPlugin;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by shankari on 8/21/17.
@@ -108,12 +111,32 @@ class PromptedAuth implements AuthTokenCreator {
         }
     }
 
-    private AuthPendingResult readStoredUserAuthEntry(Context ctxt) {
+    private AuthPendingResult readStoredUserAuthEntry(Context ctxt) throws RuntimeException {
         AuthPendingResult authPending = new AuthPendingResult();
-        String userEmail = UserProfile.getInstance(ctxt).getUserEmail();
-        AuthResult result = new AuthResult(
+        AuthResult result = null;
+        try {
+            String userEmail = null;
+            JSONObject dbStorageObject = UserCacheFactory.getUserCache(ctxt).getLocalStorage(EXPECTED_METHOD, false);
+            if (dbStorageObject == null) {
+                Log.i(ctxt, TAG, "Auth not found in local storage, copying from user profile");
+                String profileUserEmail = UserProfile.getInstance(ctxt).getUserEmail();
+                Log.i(ctxt, TAG, "Profile user email = " + profileUserEmail);
+                dbStorageObject = new JSONObject();
+                dbStorageObject.put("userEmail", profileUserEmail);
+                UserCacheFactory.getUserCache(ctxt).putLocalStorage(EXPECTED_METHOD, dbStorageObject);
+                userEmail = profileUserEmail;
+            } else {
+                userEmail = dbStorageObject.getString("userEmail");
+                Log.i(ctxt, TAG,"Auth found in local storage, now it should be stable");
+            }
+            result = new AuthResult(
                 new Status(CommonStatusCodes.SUCCESS),
                 userEmail, userEmail);
+        } catch (JSONException e) {
+            result = new AuthResult(
+                    new Status(CommonStatusCodes.ERROR),
+                    e.getLocalizedMessage(), e.getLocalizedMessage());
+        }
         authPending.setResult(result);
         return authPending;
     }
