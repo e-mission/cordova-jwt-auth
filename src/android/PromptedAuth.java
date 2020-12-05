@@ -86,13 +86,13 @@ class PromptedAuth implements AuthTokenCreator {
         if (EXPECTED_HOST.equals(launchUrl.getHost())) {
             String method = launchUrl.getQueryParameter(METHOD_PARAM_KEY);
             if(method != null && EXPECTED_METHOD.equals(method)) {
-                String userEmail = launchUrl.getQueryParameter(TOKEN_PARAM_KEY);
-                if (userEmail != null) {
-                    UserProfile.getInstance(mCtxt).setUserEmail(userEmail);
+                String token = launchUrl.getQueryParameter(TOKEN_PARAM_KEY);
+                if (token != null) {
+                    UserProfile.getInstance(mCtxt).setUserEmail(token);
                     AuthResult authResult = new AuthResult(
                             new Status(CommonStatusCodes.SUCCESS),
-                            userEmail,
-                            userEmail);
+                            token,
+                            token);
                     mAuthPending.setResult(authResult);
                 } else {
                     Log.i(mCtxt, TAG, "Received uri with query params = "+launchUrl.getQuery()
@@ -111,27 +111,27 @@ class PromptedAuth implements AuthTokenCreator {
         }
     }
 
-    private AuthPendingResult readStoredUserAuthEntry(Context ctxt) throws RuntimeException {
+    private AuthPendingResult readStoredUserAuthEntry(Context ctxt) {
         AuthPendingResult authPending = new AuthPendingResult();
         AuthResult result = null;
         try {
-            String userEmail = null;
+            String token = null;
             JSONObject dbStorageObject = UserCacheFactory.getUserCache(ctxt).getLocalStorage(EXPECTED_METHOD, false);
             if (dbStorageObject == null) {
                 Log.i(ctxt, TAG, "Auth not found in local storage, copying from user profile");
-                String profileUserEmail = UserProfile.getInstance(ctxt).getUserEmail();
-                Log.i(ctxt, TAG, "Profile user email = " + profileUserEmail);
+                String profileToken = UserProfile.getInstance(ctxt).getUserEmail();
+                Log.i(ctxt, TAG, "Profile token = " + profileToken);
                 dbStorageObject = new JSONObject();
-                dbStorageObject.put("userEmail", profileUserEmail);
+                dbStorageObject.put(TOKEN_PARAM_KEY, profileToken);
                 UserCacheFactory.getUserCache(ctxt).putLocalStorage(EXPECTED_METHOD, dbStorageObject);
-                userEmail = profileUserEmail;
+                token = profileToken;
             } else {
-                userEmail = dbStorageObject.getString("userEmail");
+                token = dbStorageObject.getString(TOKEN_PARAM_KEY);
                 Log.i(ctxt, TAG,"Auth found in local storage, now it should be stable");
             }
             result = new AuthResult(
                 new Status(CommonStatusCodes.SUCCESS),
-                userEmail, userEmail);
+                    token, token);
         } catch (JSONException e) {
             result = new AuthResult(
                     new Status(CommonStatusCodes.ERROR),
