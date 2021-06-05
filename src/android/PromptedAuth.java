@@ -71,7 +71,7 @@ class PromptedAuth implements AuthTokenCreator {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(mCtxt, TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data.getDataString());
+        Log.d(mCtxt, TAG, "onActivityResult(" + requestCode + "," + resultCode);
         Log.i(mCtxt, TAG, "onActivityResult unused in `prompted-auth, ignoring call...");
     }
 
