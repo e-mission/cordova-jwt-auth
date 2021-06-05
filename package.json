@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-em-jwt-auth",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "description": "Several wrappers for authentication methods",
   "license": "BSD-3-Clause",
   "cordova": {
