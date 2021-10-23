@@ -7,7 +7,7 @@
 //
 
 #import "OpenIDAuth.h"
-#import "AppAuth.h"
+@import AppAuth;
 #import <JWT/JWT.h>
 #import <Cordova/CDV.h>
 #import "BEMConnectionSettings.h"
