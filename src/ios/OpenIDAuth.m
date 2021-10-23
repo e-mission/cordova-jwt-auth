@@ -8,7 +8,7 @@
 
 #import "OpenIDAuth.h"
 @import AppAuth;
-#import <JWT/JWT.h>
+@import JWT;
 #import <Cordova/CDV.h>
 #import "BEMConnectionSettings.h"
 #import "LocalNotificationManager.h"
