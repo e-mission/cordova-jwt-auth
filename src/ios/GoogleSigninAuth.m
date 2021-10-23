@@ -62,37 +62,8 @@ NSString* const BEMJWTAuthComplete = @"BEMJWTAuthComplete";
 - (void) getValidAuth:(GoogleSigninCallback) authCompletionCallback
 {
     [[GIDSignIn sharedInstance] restorePreviousSignInWithCallback:^(GIDGoogleUser * _Nullable user, NSError * _Nullable error) {
-        [self didSignInForUser:user withError:error];
+        authCompletionCallback(user, error);
     }];
-}
-
-- (void) registerCallback:(GoogleSigninCallback)authCompletionCallback
-{
-    // pattern from `addObserverForName` docs
-    // https://developer.apple.com/reference/foundation/nsnotificationcenter/1411723-addobserverforname
-    NSNotificationCenter * __weak center = [NSNotificationCenter defaultCenter];
-    id __block token = [[NSNotificationCenter defaultCenter] addObserverForName:BEMJWTAuthComplete
-                                                      object:nil
-                                                       queue:nil
-                                                  usingBlock:^(NSNotification *note) {
-                                                      if([note.userInfo[STATUS_KEY] isEqual:@YES]) {
-                                                          authCompletionCallback(note.object, NULL);
-        } else {
-                                                          authCompletionCallback(NULL, note.object);
-}
-                                                      [center removeObserver:token];
-                                                  }];
-}
-
--(void)didSignInForUser:(GIDGoogleUser *)user withError:(NSError *)error
-{
-    if (error == NULL) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:BEMJWTAuthComplete
-                                                            object:user userInfo:@{STATUS_KEY: @YES}];
-    } else {
-        [[NSNotificationCenter defaultCenter] postNotificationName:BEMJWTAuthComplete
-                                                            object:error userInfo:@{STATUS_KEY: @NO}];
-    }
 }
 
 -(void)handleNotification:(NSNotification *)notification
