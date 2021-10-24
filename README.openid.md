@@ -1,5 +1,13 @@
 Cordova JWT Auth OpenID support
 ---
+
+🚧 This functionality is currently untested in the most recent version (1.6.5) since I don't have a server to test against.
+If you use OpenID Auth and find errors, please contact me with information about your server so I can fix it 🚧 
+
+🗑️ If this functionality is not currently used, I might deprecate it in the
+next release and remove in 2 releases later. So if you do use this
+functionality, please speak up! 🗑️
+
 The plugin currently supports login with generic OpenID providers, while a few additional configuration needed to be 
 made in order for the plugin to function.
 
