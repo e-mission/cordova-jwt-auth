@@ -16,7 +16,7 @@
 #import "BEMConstants.h"
 #import "LocalNotificationManager.h"
 #import <Cordova/CDV.h>
-#import <GoogleSignIn/GoogleSignIn.h>
+@import GoogleSignIn;
 
 
 typedef void (^GoogleSigninCallback)(GIDGoogleUser *,NSError*);
@@ -24,8 +24,9 @@ typedef NSString* (^ProfileRetValue)(GIDGoogleUser *);
 
 #define NOT_SIGNED_IN_CODE 1000
 
-@interface GoogleSigninAuth () <GIDSignInDelegate>
+@interface GoogleSigninAuth ()
     @property (atomic, retain) CDVPlugin* mPlugin;
+    @property (atomic, retain) GIDConfiguration* signInConfig;
 @end
 
 @implementation GoogleSigninAuth
@@ -40,13 +41,14 @@ NSString* const BEMJWTAuthComplete = @"BEMJWTAuthComplete";
         NSLog(@"creating new GoogleSigninAuth sharedInstance");
         sharedInstance = [GoogleSigninAuth new];
 
-        GIDSignIn* signIn = [GIDSignIn sharedInstance];
-        signIn.clientID = [[ConnectionSettings sharedInstance] authValueForKey:@"clientID"];
+        NSString* iOSClientID = [[ConnectionSettings sharedInstance] authValueForKey:@"clientID"];
+        sharedInstance.signInConfig = [[GIDConfiguration alloc] initWithClientID:iOSClientID];
+
+        
         // client secret is no longer required for this client
         // signIn.serverClientID = [[ConnectionSettings sharedInstance] getGoogleiOSClientSecret];
-        signIn.delegate = sharedInstance;
-        [LocalNotificationManager addNotification:[NSString stringWithFormat:@"Finished setting clientId = %@ and serverClientID = %@", signIn.clientID, signIn.serverClientID]];
-        [LocalNotificationManager addNotification:[NSString stringWithFormat:@"Finished setting delegate = %@", signIn.delegate]];
+        // signIn.delegate = sharedInstance;
+        [LocalNotificationManager addNotification:[NSString stringWithFormat:@"Finished setting clientId = %@", iOSClientID]];
     }
     return sharedInstance;
 }
@@ -59,38 +61,9 @@ NSString* const BEMJWTAuthComplete = @"BEMJWTAuthComplete";
 
 - (void) getValidAuth:(GoogleSigninCallback) authCompletionCallback
 {
-    [self registerCallback:authCompletionCallback];
-    [[GIDSignIn sharedInstance] restorePreviousSignIn];
-}
-
-- (void) registerCallback:(GoogleSigninCallback)authCompletionCallback
-{
-    // pattern from `addObserverForName` docs
-    // https://developer.apple.com/reference/foundation/nsnotificationcenter/1411723-addobserverforname
-    NSNotificationCenter * __weak center = [NSNotificationCenter defaultCenter];
-    id __block token = [[NSNotificationCenter defaultCenter] addObserverForName:BEMJWTAuthComplete
-                                                      object:nil
-                                                       queue:nil
-                                                  usingBlock:^(NSNotification *note) {
-                                                      if([note.userInfo[STATUS_KEY] isEqual:@YES]) {
-                                                          authCompletionCallback(note.object, NULL);
-        } else {
-                                                          authCompletionCallback(NULL, note.object);
-}
-                                                      [center removeObserver:token];
-                                                  }];
-}
-
--(void)signIn:(GIDSignIn*)signIn didSignInForUser:(GIDGoogleUser *)user
-    withError:(NSError *)error
-{
-    if (error == NULL) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:BEMJWTAuthComplete
-                                                            object:user userInfo:@{STATUS_KEY: @YES}];
-    } else {
-        [[NSNotificationCenter defaultCenter] postNotificationName:BEMJWTAuthComplete
-                                                            object:error userInfo:@{STATUS_KEY: @NO}];
-    }
+    [[GIDSignIn sharedInstance] restorePreviousSignInWithCallback:^(GIDGoogleUser * _Nullable user, NSError * _Nullable error) {
+        authCompletionCallback(user, error);
+    }];
 }
 
 -(void)handleNotification:(NSNotification *)notification
@@ -150,11 +123,13 @@ NSString* const BEMJWTAuthComplete = @"BEMJWTAuthComplete";
 - (void) uiSignIn:(AuthResultCallback)authResultCallback withPlugin:(CDVPlugin*) plugin
 {
     self.mPlugin = plugin;
-    [GIDSignIn sharedInstance].presentingViewController = self.mPlugin.viewController;
-    [self registerCallback:[self getRedirectedCallback:authResultCallback
+    GoogleSigninCallback currCallback = [self getRedirectedCallback:authResultCallback
                                           withRetValue:^NSString *(GIDGoogleUser *user) {
                                               return user.profile.email;
-    }]];
+    }];
+    [GIDSignIn.sharedInstance signInWithConfiguration:self.signInConfig
+                             presentingViewController:self.mPlugin.viewController
+                                             callback:currCallback];
 }
 // END: UI interaction
 
