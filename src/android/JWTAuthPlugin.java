@@ -22,7 +22,7 @@ public class JWTAuthPlugin extends CordovaPlugin {
     @Override
     public boolean execute(String action, JSONArray data, final CallbackContext callbackContext) throws JSONException {
         tokenCreator = AuthTokenCreationFactory.getInstance(cordova.getActivity());
-        if (action.equals("getUserEmail")) {
+        if (action.equals("getOPCode")) {
             Activity ctxt = cordova.getActivity();
             AuthPendingResult result = tokenCreator.getUserEmail();
             result.setResultCallback(new ResultCallback<AuthResult>() {
@@ -37,48 +37,16 @@ public class JWTAuthPlugin extends CordovaPlugin {
                 }
             });
             return true;
-        } else if (action.equals("signIn")) {
-            AuthPendingResult result = tokenCreator.uiSignIn(this);
-            result.setResultCallback(new ResultCallback<AuthResult>() {
-                @Override
-                public void onResult(@NonNull AuthResult authResult) {
-                    if (authResult.getStatus().isSuccess()) {
-                        Toast.makeText(cordova.getActivity(), authResult.getEmail(),
-                                Toast.LENGTH_SHORT).show();
-                        callbackContext.success(authResult.getEmail());
-                    } else {
-                        callbackContext.error(authResult.getStatus().getStatusCode() + " : "+
-                                authResult.getStatus().getStatusMessage());
-                    }
-                }
-            });
-            return true;
-        } else if (action.equals("getJWT")) {
-            AuthPendingResult result = tokenCreator.getServerToken();
-            result.setResultCallback(new ResultCallback<AuthResult>() {
-                @Override
-                public void onResult(@NonNull AuthResult authResult) {
-                    if (authResult.getStatus().isSuccess()) {
-                        callbackContext.success(authResult.getToken());
-                    } else {
-                        callbackContext.error(authResult.getStatus().getStatusCode() + " : "+
-                                authResult.getStatus().getStatusMessage());
-                    }
-                    // TODO: Figure out how to handle pending status codes here
-                    // Would be helpful if I could actually generate some to test :)
-                }
-            });
-            return true;
-        } else if (action.equals("setPromptedAuthToken")) {
+        } else if (action.equals("setOPCode")) {
             if (tokenCreator.getClass() != PromptedAuth.class) {
                 callbackContext.error("Attempting to set programmatic token conflicts"
                         + "with configured auth method");
             }
-            String email = data.getString(0);
+            String opcode = data.getString(0);
             Log.d(cordova.getActivity(),TAG,
-                    "Force setting the prompted auth token = "+email);
-            ((PromptedAuth)tokenCreator).writeStoredUserAuthEntry(cordova.getActivity(), email);
-            callbackContext.success(email);
+                    "Force setting the prompted auth token = "+opcode);
+            ((PromptedAuth)tokenCreator).writeStoredUserAuthEntry(cordova.getActivity(), opcode);
+            callbackContext.success(opcode);
             return true;
         } else {
             return false;

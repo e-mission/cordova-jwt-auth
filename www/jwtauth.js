@@ -2,29 +2,27 @@
 
 var exec = require("cordova/exec")
 
-var JWTAuth = {
+var OPCodeAuth = {
     /*
-     * Returns the stored user email.
+     * Returns the stored OPCode (aka token)
      * Can return null if the user is not signed in.
      */
-    getUserEmail: function () {
+    getOPCode: function () {
         return new Promise(function(resolve, reject) {
-             exec(resolve, reject, "JWTAuth", "getUserEmail", []);
+             exec(resolve, reject, "OPCodeAuth", "getOPCode", []);
         });
     },
 
     /*
-     * Although we generally support auth through callbacks, this is special
-     * because we may want to call it from the client to programatically create
-     * a string or token and we don't want to jump through in app browser hoops
-     * to do so.
+     * Corresponding "set" method since we generate the OPCode (aka token) in
+     * the phone app and just pass it here for storage.
      */
 
-    setPromptedAuthToken(email) {
+    setOPCode(opcode) {
         return new Promise(function(resolve, reject) {
-            exec(resolve, reject, "JWTAuth", "setPromptedAuthToken", [email]);
+            exec(resolve, reject, "OPCodeAuth", "setOPCode", [opcode]);
         });
     },
 }
 
-module.exports = JWTAuth;
+module.exports = OPCodeAuth;

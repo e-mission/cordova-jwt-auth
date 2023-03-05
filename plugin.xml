@@ -3,7 +3,7 @@
         id="cordova-plugin-em-jwt-auth"
         version="1.6.5">
   
-  <name>JWTAuth</name>
+  <name>OPCodeAuth</name>
   <description>Get the user email and associated JWT tokens from both native
         code and javascript. These are merged since the typical OAuth/JWT
         process returns both the email address that the user logged in as, as a
@@ -20,7 +20,7 @@
   <asset src="www/jwtauth.js" target="js/jwtauth.js"/>
 
   <js-module src="www/jwtauth.js" name="jwtauth">
-    <clobbers target="cordova.plugins.BEMJWTAuth" />
+    <clobbers target="cordova.plugins.OPCodeAuth" />
   </js-module>
 
   <!--
@@ -33,7 +33,7 @@
 
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
-      <feature name="JWTAuth">
+      <feature name="OPCodeAuth">
         <param name="android-package" value="edu.berkeley.eecs.emission.cordova.jwtauth.JWTAuthPlugin"/>
         <param name="onload" value="true"/>
       </feature>
@@ -73,7 +73,7 @@
   <platform name="ios">
 
     <config-file target="config.xml" parent="/*">
-      <feature name="JWTAuth">
+      <feature name="OPCodeAuth">
         <param name="ios-package" value="BEMJWTAuth" />
         <param name="onload" value="true"/>
       </feature>

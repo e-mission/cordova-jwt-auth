@@ -40,7 +40,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationLaunchedWithUrl:) name:CDVPluginHandleOpenURLNotification object:nil];
 }
 
-- (void)getUserEmail:(CDVInvokedUrlCommand*)command
+- (void)getOPCode:(CDVInvokedUrlCommand*)command
 {
     NSString* callbackId = [command callbackId];
     
@@ -73,37 +73,7 @@
     }
 }
 
-
-- (void)signIn:(CDVInvokedUrlCommand*)command
-{
-    @try {
-        _token_creator = [AuthTokenCreationFactory getInstance];
-        [_token_creator uiSignIn:[self getCallbackForCommand:command] withPlugin:self];
-    }
-    @catch (NSException *exception) {
-        NSString* msg = [NSString stringWithFormat: @"While getting user email, error %@", exception];
-                    CDVPluginResult* result = [CDVPluginResult
-                                               resultWithStatus:CDVCommandStatus_ERROR
-                                               messageAsString:msg];
-        [self.commandDelegate sendPluginResult:result callbackId:[command callbackId]];
-                }
-}
-
-- (void)getJWT:(CDVInvokedUrlCommand*)command
-{
-    @try {
-        _token_creator = [AuthTokenCreationFactory getInstance];
-        [_token_creator getJWT:[self getCallbackForCommand:command]];
-    }
-    @catch (NSException *exception) {
-            NSString* msg = [NSString stringWithFormat: @"While getting JWT, error %@", exception];
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
-                                       messageAsString:msg];
-        [self.commandDelegate sendPluginResult:result callbackId:[command callbackId]];
-    }
-}
-
-- (void)setPromptedAuthToken:(CDVInvokedUrlCommand*)command
+- (void)setOPCode:(CDVInvokedUrlCommand*)command
 {
     @try {
         _token_creator = [AuthTokenCreationFactory getInstance];
@@ -113,9 +83,9 @@
                     @"Setting programmatic token conflicts with configured auth method"
                                        code:100 userInfo:NULL]);
         } else {
-            NSString* email = [[command arguments] objectAtIndex:0];
-            [PromptedAuth setStoredUserAuthEntry:email];
-            [self getCallbackForCommand:command](email, NULL);
+            NSString* opcode = [[command arguments] objectAtIndex:0];
+            [PromptedAuth setStoredUserAuthEntry:opcode];
+            [self getCallbackForCommand:command](opcode, NULL);
         }
     }
     @catch (NSException *exception) {

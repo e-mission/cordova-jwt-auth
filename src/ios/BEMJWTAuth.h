@@ -2,8 +2,7 @@
 
 @interface BEMJWTAuth: CDVPlugin
 
-- (void) getUserEmail:(CDVInvokedUrlCommand*)command;
-- (void) signIn:(CDVInvokedUrlCommand*)command;
-- (void) getJWT:(CDVInvokedUrlCommand*)command;
+- (void) getOPCode:(CDVInvokedUrlCommand*)command;
+- (void) setOPCode:(CDVInvokedUrlCommand*)command;
 
 @end
