@@ -56,15 +56,12 @@
     <!-- Configuration of OpenID auth plugin end -->
 
     <source-file src="src/android/OPCodePlugin.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
-    <source-file src="src/android/GoogleAccountManagerAuth.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
     <source-file src="src/android/PromptedAuth.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
     <source-file src="src/android/UserProfile.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
     <source-file src="src/android/AuthResult.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
     <source-file src="src/android/AuthPendingResult.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
     <source-file src="src/android/AuthTokenCreator.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
     <source-file src="src/android/AuthTokenCreationFactory.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
-    <source-file src="src/android/OpenIDAuthStateManager.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
-    <source-file src="src/android/OpenIDAuth.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
   </platform>
 
   <platform name="ios">
@@ -103,17 +100,13 @@
     </podspec>
 
     <header-file src="src/ios/BEMOPCode.h"/>
-    <header-file src="src/ios/GoogleSigninAuth.h"/>
     <header-file src="src/ios/PromptedAuth.h"/>
     <header-file src="src/ios/AuthTokenCreator.h"/>
     <header-file src="src/ios/AuthTokenCreationFactory.h"/>
-    <header-file src="src/ios/OpenIDAuth.h"/>
 
     <source-file src="src/ios/BEMOPCode.m"/>
-    <source-file src="src/ios/GoogleSigninAuth.m"/>
     <source-file src="src/ios/PromptedAuth.m"/>
     <source-file src="src/ios/AuthTokenCreationFactory.m"/>
-    <source-file src="src/ios/OpenIDAuth.m"/>
 
   </platform>
 </plugin>

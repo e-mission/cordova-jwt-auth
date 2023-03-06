@@ -1,10 +1,8 @@
 #import "BEMOPCode.h"
 #import "LocalNotificationManager.h"
-#import "BEMConnectionSettings.h"
 #import "AuthTokenCreationFactory.h"
 #import "AuthTokenCreator.h"
 #import "BEMBuiltinUserCache.h"
-#import "PromptedAuth.h"
 
 @interface BEMOPCode ()
 @property (nonatomic, retain) CDVInvokedUrlCommand* command;
@@ -50,7 +48,7 @@
         // message OK with result = NULL if the user does not exist.
         // Maintaining that backwards compatible behavior for now...
         _token_creator = [AuthTokenCreationFactory getInstance];
-        [_token_creator getEmail:^(NSString *userEmail, NSError *error) {
+        [_token_creator getOPCode:^(NSString *userEmail, NSError *error) {
             if (userEmail != NULL) {
                 CDVPluginResult* result = [CDVPluginResult
                                            resultWithStatus:CDVCommandStatus_OK
@@ -77,16 +75,9 @@
 {
     @try {
         _token_creator = [AuthTokenCreationFactory getInstance];
-        if ([_token_creator class] != [PromptedAuth class]) {
-            [self getCallbackForCommand:command]
-            (NULL, [NSError errorWithDomain:
-                    @"Setting programmatic token conflicts with configured auth method"
-                                       code:100 userInfo:NULL]);
-        } else {
-            NSString* opcode = [[command arguments] objectAtIndex:0];
-            [PromptedAuth setStoredUserAuthEntry:opcode];
-            [self getCallbackForCommand:command](opcode, NULL);
-        }
+        NSString* opcode = [[command arguments] objectAtIndex:0];
+        [_token_creator setOPCode:opcode];
+        [self getCallbackForCommand:command](opcode, NULL);
     }
     @catch (NSException *exception) {
             NSString* msg = [NSString stringWithFormat: @"While setting programmatic token, error %@", exception];
@@ -115,19 +106,6 @@
                                         callbackId:command.callbackId];
     }
     };
-}
-
-- (void)applicationLaunchedWithUrl:(NSNotification*)notification
-{
-    // Make this consistent with android to fix crashes if the user clicks on a URL
-    // without launching the app first
-    // (https://github.com/e-mission/cordova-jwt-auth/issues/33#issuecomment-432396115)
-    [LocalNotificationManager addNotification:[NSString stringWithFormat:@"BEMJWTAuth:applicationLaunchedWithUrl %@", notification]];
-    if (_token_creator != NULL) {
-        [_token_creator handleNotification:notification];
-    } else {
-        [LocalNotificationManager addNotification:[NSString stringWithFormat:@"BEMJWTAuth:tokenCreator = null, ignoring URL %@", notification]];
-    }
 }
 
 @end
