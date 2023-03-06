@@ -1,4 +1,4 @@
-#import "BEMJWTAuth.h"
+#import "BEMOPCode.h"
 #import "LocalNotificationManager.h"
 #import "BEMConnectionSettings.h"
 #import "AuthTokenCreationFactory.h"
@@ -6,12 +6,12 @@
 #import "BEMBuiltinUserCache.h"
 #import "PromptedAuth.h"
 
-@interface BEMJWTAuth ()
+@interface BEMOPCode ()
 @property (nonatomic, retain) CDVInvokedUrlCommand* command;
 @property id<AuthTokenCreator> token_creator;
 @end
 
-@implementation BEMJWTAuth: CDVPlugin
+@implementation BEMOPCode: CDVPlugin
 
 
 - (void)pluginInitialize

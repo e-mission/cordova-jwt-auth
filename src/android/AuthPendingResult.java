@@ -1,4 +1,4 @@
-package edu.berkeley.eecs.emission.cordova.jwtauth;
+package edu.berkeley.eecs.emission.cordova.opcodeauth;
 
 import android.os.AsyncTask;
 import androidx.annotation.NonNull;

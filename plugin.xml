@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
-        id="cordova-plugin-em-jwt-auth"
+        id="cordova-plugin-em-opcodeauth"
         version="1.6.5">
   
   <name>OPCodeAuth</name>
-  <description>Get the user email and associated JWT tokens from both native
-        code and javascript. These are merged since the typical OAuth/JWT
-        process returns both the email address that the user logged in as, as a
-        token that encodes that value. </description>
+  <description>Get the authentication token (aka opcode) associaed with a user.</description>
   <author>K. Shankari (shankari@eecs.berkeley.edu)</author>
   <license>Modified BSD license</license>
 
@@ -17,9 +14,9 @@
     <engine name="cordova-ios" version=">=5.0.0"/>
   </engines>
 
-  <asset src="www/jwtauth.js" target="js/jwtauth.js"/>
+  <asset src="www/opcodeauth.js" target="js/opcodeauth.js"/>
 
-  <js-module src="www/jwtauth.js" name="jwtauth">
+  <js-module src="www/opcodeauth.js" name="opcodeauth">
     <clobbers target="cordova.plugins.OPCodeAuth" />
   </js-module>
 
@@ -34,7 +31,7 @@
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
       <feature name="OPCodeAuth">
-        <param name="android-package" value="edu.berkeley.eecs.emission.cordova.jwtauth.JWTAuthPlugin"/>
+        <param name="android-package" value="edu.berkeley.eecs.emission.cordova.opcodeauth.OPCodePlugin"/>
         <param name="onload" value="true"/>
       </feature>
     </config-file>
@@ -58,23 +55,23 @@
     <framework src="src/android/openid-config.gradle" custom="true" type="gradleReference" />
     <!-- Configuration of OpenID auth plugin end -->
 
-    <source-file src="src/android/JWTAuthPlugin.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
-    <source-file src="src/android/GoogleAccountManagerAuth.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
-    <source-file src="src/android/PromptedAuth.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
-    <source-file src="src/android/UserProfile.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
-    <source-file src="src/android/AuthResult.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
-    <source-file src="src/android/AuthPendingResult.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
-    <source-file src="src/android/AuthTokenCreator.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
-    <source-file src="src/android/AuthTokenCreationFactory.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
-    <source-file src="src/android/OpenIDAuthStateManager.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
-    <source-file src="src/android/OpenIDAuth.java" target-dir="src/edu/berkeley/eecs/emission/cordova/jwtauth"/>
+    <source-file src="src/android/OPCodePlugin.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
+    <source-file src="src/android/GoogleAccountManagerAuth.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
+    <source-file src="src/android/PromptedAuth.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
+    <source-file src="src/android/UserProfile.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
+    <source-file src="src/android/AuthResult.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
+    <source-file src="src/android/AuthPendingResult.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
+    <source-file src="src/android/AuthTokenCreator.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
+    <source-file src="src/android/AuthTokenCreationFactory.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
+    <source-file src="src/android/OpenIDAuthStateManager.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
+    <source-file src="src/android/OpenIDAuth.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
   </platform>
 
   <platform name="ios">
 
     <config-file target="config.xml" parent="/*">
       <feature name="OPCodeAuth">
-        <param name="ios-package" value="BEMJWTAuth" />
+        <param name="ios-package" value="BEMOPCode" />
         <param name="onload" value="true"/>
       </feature>
     </config-file>
@@ -105,14 +102,14 @@
       </pods>
     </podspec>
 
-    <header-file src="src/ios/BEMJWTAuth.h"/>
+    <header-file src="src/ios/BEMOPCode.h"/>
     <header-file src="src/ios/GoogleSigninAuth.h"/>
     <header-file src="src/ios/PromptedAuth.h"/>
     <header-file src="src/ios/AuthTokenCreator.h"/>
     <header-file src="src/ios/AuthTokenCreationFactory.h"/>
     <header-file src="src/ios/OpenIDAuth.h"/>
 
-    <source-file src="src/ios/BEMJWTAuth.m"/>
+    <source-file src="src/ios/BEMOPCode.m"/>
     <source-file src="src/ios/GoogleSigninAuth.m"/>
     <source-file src="src/ios/PromptedAuth.m"/>
     <source-file src="src/ios/AuthTokenCreationFactory.m"/>

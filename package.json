@@ -1,10 +1,10 @@
 {
-  "name": "cordova-plugin-em-jwt-auth",
+  "name": "cordova-plugin-em-opcodeauth",
   "version": "1.6.4",
-  "description": "Several wrappers for authentication methods",
+  "description": "Wrapper for the single authentication method (token based auth)",
   "license": "BSD-3-Clause",
   "cordova": {
-    "id": "cordova-plugin-em-jwt-auth",
+    "id": "cordova-plugin-em-opcodeauth",
     "platforms": [
       "android",
       "ios"
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/e-mission/cordova-jwt-auth.git"
+    "url": "git+https://github.com/e-mission/cordova-opcode-auth.git"
   },
   "keywords": [
     "emission",
@@ -42,7 +42,7 @@
   ],
   "author": "K. Shankari",
   "bugs": {
-    "url": "https://github.com/e-mission/cordova-jwt-auth/issues"
+    "url": "https://github.com/e-mission/cordova-opcode-auth/issues"
   },
-  "homepage": "https://e-mission/cordova-jwt-auth"
+  "homepage": "https://github.com/e-mission/cordova-opcode-auth"
 }

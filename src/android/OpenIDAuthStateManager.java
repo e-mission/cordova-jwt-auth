@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package edu.berkeley.eecs.emission.cordova.jwtauth;
+package edu.berkeley.eecs.emission.cordova.opcodeauth;
 
 import android.content.Context;
 import android.content.SharedPreferences;

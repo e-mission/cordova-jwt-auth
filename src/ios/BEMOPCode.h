@@ -1,6 +1,6 @@
 #import <Cordova/CDV.h>
 
-@interface BEMJWTAuth: CDVPlugin
+@interface BEMOPCode: CDVPlugin
 
 - (void) getOPCode:(CDVInvokedUrlCommand*)command;
 - (void) setOPCode:(CDVInvokedUrlCommand*)command;

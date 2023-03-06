@@ -1,4 +1,4 @@
-package edu.berkeley.eecs.emission.cordova.jwtauth;
+package edu.berkeley.eecs.emission.cordova.opcodeauth;
 
 import org.apache.cordova.*;
 import org.json.JSONArray;
@@ -14,8 +14,8 @@ import com.google.android.gms.common.api.ResultCallback;
 
 import edu.berkeley.eecs.emission.cordova.unifiedlogger.Log;
 
-public class JWTAuthPlugin extends CordovaPlugin {
-    private static String TAG = "JWTAuthPlugin";
+public class OPCodePlugin extends CordovaPlugin {
+    private static String TAG = "OPCodePlugin";
     private AuthTokenCreator tokenCreator;
     private static final int RESOLVE_ERROR_CODE = 2000;
 
