@@ -11,5 +11,4 @@
 
 @interface PromptedAuth : NSObject <AuthTokenCreator>
 + (PromptedAuth*) sharedInstance;
-+ (void) setStoredUserAuthEntry: (NSString*)token;
 @end
