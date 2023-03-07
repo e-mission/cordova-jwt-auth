@@ -57,7 +57,6 @@
 
     <source-file src="src/android/OPCodePlugin.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
     <source-file src="src/android/PromptedAuth.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
-    <source-file src="src/android/UserProfile.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
     <source-file src="src/android/AuthResult.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
     <source-file src="src/android/AuthPendingResult.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
     <source-file src="src/android/AuthTokenCreator.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>

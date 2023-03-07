@@ -58,15 +58,7 @@ class PromptedAuth implements AuthTokenCreator {
         try {
             String token = null;
             JSONObject dbStorageObject = UserCacheFactory.getUserCache(ctxt).getLocalStorage(EXPECTED_METHOD, false);
-            if (dbStorageObject == null) {
-                Log.i(ctxt, TAG, "Auth not found in local storage, copying from user profile");
-                String profileToken = UserProfile.getInstance(ctxt).getUserEmail();
-                Log.i(ctxt, TAG, "Profile token = " + profileToken);
-                dbStorageObject = new JSONObject();
-                dbStorageObject.put(TOKEN_PARAM_KEY, profileToken);
-                UserCacheFactory.getUserCache(ctxt).putLocalStorage(EXPECTED_METHOD, dbStorageObject);
-                token = profileToken;
-            } else {
+            if (dbStorageObject != null) {
                 token = dbStorageObject.getString(TOKEN_PARAM_KEY);
                 Log.i(ctxt, TAG,"Auth found in local storage, now it should be stable");
             }

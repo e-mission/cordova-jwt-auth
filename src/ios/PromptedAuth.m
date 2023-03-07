@@ -85,14 +85,7 @@ static PromptedAuth *sharedInstance;
 {
     NSString* token = NULL;
     NSDictionary* dbStorageObject = [[BuiltinUserCache database] getLocalStorage:EXPECTED_METHOD withMetadata:NO];
-    if (dbStorageObject == NULL) {
-        [LocalNotificationManager addNotification:
-            [NSString stringWithFormat:@"Auth not found in local storage, copying from user profile"]];
-        NSString* profileToken = [[NSUserDefaults standardUserDefaults] objectForKey:STORAGE_KEY];
-        dbStorageObject = @{TOKEN_PARAM_KEY: profileToken};
-        [[BuiltinUserCache database] putLocalStorage:EXPECTED_METHOD jsonValue:dbStorageObject];
-        token = profileToken;
-    } else {
+    if (dbStorageObject != NULL) {
         [LocalNotificationManager addNotification:
             [NSString stringWithFormat:@"Auth found in local storage, now it should be stable"]];
         token = dbStorageObject[TOKEN_PARAM_KEY];
