@@ -36,25 +36,6 @@
       </feature>
     </config-file>
 
-    <framework src="com.google.android.gms:play-services-auth:$AUTH_VERSION"/>
-    <preference name="AUTH_VERSION" default="19.2.0"/>
-
-    <!-- Configuration of OpenID auth plugin start -->
-    <framework src="net.openid:appauth:0.10.0"/>
-    <config-file target="AndroidManifest.xml" parent="/manifest/application">
-      <activity android:name="net.openid.appauth.RedirectUriReceiverActivity">
-        <intent-filter>
-          <action android:name="android.intent.action.VIEW"/>
-          <category android:name="android.intent.category.DEFAULT"/>
-          <category android:name="android.intent.category.BROWSABLE"/>
-          <data android:scheme="emission.auth" />
-        </intent-filter>
-      </activity>
-    </config-file>
-    <framework src="com.auth0.android:jwtdecode:2.0.0"/>
-    <framework src="src/android/openid-config.gradle" custom="true" type="gradleReference" />
-    <!-- Configuration of OpenID auth plugin end -->
-
     <source-file src="src/android/OPCodePlugin.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
     <source-file src="src/android/PromptedAuth.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
     <source-file src="src/android/AuthResult.java" target-dir="src/edu/berkeley/eecs/emission/cordova/opcodeauth"/>
@@ -71,32 +52,6 @@
         <param name="onload" value="true"/>
       </feature>
     </config-file>
-
-    <config-file target="*-Info.plist" parent="CFBundleURLTypes">
-      <array>
-        <dict>
-          <key>CFBundleTypeRole</key>
-          <string>Editor</string>
-          <key>CFBundleURLSchemes</key>
-          <array>
-            <string>emission.auth</string>
-          </array>
-        </dict>
-      </array>
-    </config-file>
-
-    <framework src="SystemConfiguration.framework"/>
-    <framework src="Security.framework"/>
-    <podspec>
-      <config>
-        <source url="https://cdn.cocoapods.org/"/>
-      </config>
-      <pods use-frameworks="true">
-        <pod name="GoogleSignIn" spec="~> 6.0.2" />
-        <pod name="AppAuth" spec="~> 1.4.0" />
-        <pod name="JWT" spec="~> 3.0.0-beta.14" />
-      </pods>
-    </podspec>
 
     <header-file src="src/ios/BEMOPCode.h"/>
     <header-file src="src/ios/PromptedAuth.h"/>
