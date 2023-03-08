@@ -1,7 +1,8 @@
-package edu.berkeley.eecs.emission.cordova.jwtauth;
+package edu.berkeley.eecs.emission.cordova.opcodeauth;
 
 import android.content.Intent;
-import org.apache.cordova.CordovaPlugin;
+import android.content.Context;
+import org.json.JSONException;
 
 /**
  * Created by shankari on 8/19/17.
@@ -10,17 +11,7 @@ import org.apache.cordova.CordovaPlugin;
  */
 
 public interface AuthTokenCreator {
-    // Method to sign in via the UI
-    public AuthPendingResult uiSignIn(CordovaPlugin plugin);
-
-    // Method to retrieve signed-in user information
-    // Result is only guaranteed to have requested information filled in
-    public AuthPendingResult getUserEmail();
+    public AuthPendingResult getOPCode();
     public AuthPendingResult getServerToken();
-
-    // Callback to get the signin information, if provided through activity result
-    public void onActivityResult(int requestCode, int resultCode, Intent data);
-
-    // Callback to get the signin information, if provided through a custom URL
-    public void onNewIntent(Intent intent);
+    public void setOPCode(String token) throws JSONException;
 }
