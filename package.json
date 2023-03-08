@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-em-opcodeauth",
-  "version": "1.6.4",
+  "version": "1.7.0",
   "description": "Wrapper for the single authentication method (token based auth)",
   "license": "BSD-3-Clause",
   "cordova": {
