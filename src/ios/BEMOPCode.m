@@ -35,7 +35,6 @@
             }
         }];
     }
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationLaunchedWithUrl:) name:CDVPluginHandleOpenURLNotification object:nil];
 }
 
 - (void)getOPCode:(CDVInvokedUrlCommand*)command
