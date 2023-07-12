@@ -46,12 +46,6 @@ class PromptedAuth implements AuthTokenCreator {
         return readStoredUserAuthEntry(mCtxt);
     }
 
-    @Override
-    public AuthPendingResult getServerToken() {
-        // For the prompted-auth case, the token is the user email
-        return readStoredUserAuthEntry(mCtxt);
-    }
-
     private AuthPendingResult readStoredUserAuthEntry(Context ctxt) {
         AuthPendingResult authPending = new AuthPendingResult();
         AuthResult result = null;
@@ -64,11 +58,11 @@ class PromptedAuth implements AuthTokenCreator {
             }
             result = new AuthResult(
                 new Status(CommonStatusCodes.SUCCESS),
-                    token, token);
+                    token);
         } catch (JSONException e) {
             result = new AuthResult(
                     new Status(CommonStatusCodes.ERROR),
-                    e.getLocalizedMessage(), e.getLocalizedMessage());
+                    e.getLocalizedMessage());
         }
         authPending.setResult(result);
         return authPending;
@@ -76,8 +70,7 @@ class PromptedAuth implements AuthTokenCreator {
 
     @Override
     public void setOPCode(String opcode) throws JSONException {
-        // For the prompted-auth case, the token is the user email
-        writeStoredUserAuthEntry(mCtxt, opcode);
+        throw new JSONException("Storing opcodes through the plugin is no longer supported since it does not duplicate data");
     }
 
     private void writeStoredUserAuthEntry(Context ctxt, String opcode) throws JSONException {

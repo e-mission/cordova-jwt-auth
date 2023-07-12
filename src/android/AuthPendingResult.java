@@ -43,7 +43,7 @@ public class AuthPendingResult extends PendingResult<AuthResult> {
                     }
                 }
             } catch (InterruptedException e) {
-                mAuthResult = new AuthResult(new Status(CommonStatusCodes.INTERRUPTED), null, null);
+                mAuthResult = new AuthResult(new Status(CommonStatusCodes.INTERRUPTED), null);
             }
             return mAuthResult;
         }
@@ -65,7 +65,7 @@ public class AuthPendingResult extends PendingResult<AuthResult> {
                     }
                 }
             } catch (InterruptedException e) {
-                mAuthResult = new AuthResult(new Status(CommonStatusCodes.INTERRUPTED), null, null);
+                mAuthResult = new AuthResult(new Status(CommonStatusCodes.INTERRUPTED), null);
             }
         }
         return mAuthResult;
@@ -74,7 +74,7 @@ public class AuthPendingResult extends PendingResult<AuthResult> {
     @Override
     public void cancel() {
         synchronized(syncToken) {
-            mAuthResult = new AuthResult(new Status(CommonStatusCodes.CANCELED), null, null);
+            mAuthResult = new AuthResult(new Status(CommonStatusCodes.CANCELED), null);
             mCancelled = true;
             syncToken.notify();
             if (mResultCallback != null) {
@@ -116,7 +116,7 @@ public class AuthPendingResult extends PendingResult<AuthResult> {
                         synchronized (syncToken) {
                             if (mAuthResult == null) {
                                 AuthResult timeoutResult = new AuthResult(
-                                        new com.google.android.gms.common.api.Status(CommonStatusCodes.TIMEOUT), null, null);
+                                        new com.google.android.gms.common.api.Status(CommonStatusCodes.TIMEOUT), null);
                                 mResultCallback.onResult(timeoutResult);
                                 mResultCallback = null;
                             } else {
@@ -126,7 +126,7 @@ public class AuthPendingResult extends PendingResult<AuthResult> {
                     } catch (InterruptedException e) {
                         synchronized (syncToken) {
                             AuthResult timeoutResult = new AuthResult(
-                                    new com.google.android.gms.common.api.Status(CommonStatusCodes.INTERRUPTED), null, null);
+                                    new com.google.android.gms.common.api.Status(CommonStatusCodes.INTERRUPTED), null);
                             mResultCallback.onResult(timeoutResult);
                             mResultCallback = null;
                         }

@@ -11,13 +11,11 @@ import com.google.android.gms.common.api.Status;
 
 public class AuthResult implements Result {
     private Status status;
-    private String email;
-    private String token;
+    private String opcode;
 
-    public AuthResult(Status istatus, String iemail, String itoken) {
+    public AuthResult(Status istatus, String iopcode) {
         status = istatus;
-        email = iemail;
-        token = itoken;
+        opcode = iopcode;
     }
 
     @Override
@@ -25,11 +23,7 @@ public class AuthResult implements Result {
         return status;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public String getToken() {
-        return token;
+    public String getOPCode() {
+        return opcode;
     }
 }
