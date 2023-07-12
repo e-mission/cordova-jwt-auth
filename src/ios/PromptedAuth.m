@@ -64,7 +64,7 @@ static PromptedAuth *sharedInstance;
 
 - (void) setOPCode:(NSString*) opcode
 {
-    [NSException raise:@"Storing opcodes through the plugin is no longer supported since it does not duplicate data"];
+    [NSException raise:NSGenericException format:@"Storing opcodes through the plugin is no longer supported since it does not duplicate data"];
 }
 
 @end
