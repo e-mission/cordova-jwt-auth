@@ -12,6 +12,5 @@ import org.json.JSONException;
 
 public interface AuthTokenCreator {
     public AuthPendingResult getOPCode();
-    public AuthPendingResult getServerToken();
     public void setOPCode(String token) throws JSONException;
 }

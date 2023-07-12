@@ -29,7 +29,7 @@ public class OPCodePlugin extends CordovaPlugin {
                 @Override
                 public void onResult(@NonNull AuthResult authResult) {
                     if (authResult.getStatus().isSuccess()) {
-                        callbackContext.success(authResult.getEmail());
+                        callbackContext.success(authResult.getOPCode());
                     } else {
                         callbackContext.error(authResult.getStatus().getStatusCode() + " : "+
                                 authResult.getStatus().getStatusMessage());
